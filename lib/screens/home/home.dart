@@ -77,64 +77,71 @@ class _HomeState extends State<Home> {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: <Widget>[
-              const Text(
-                'Select Your Calories Limit',
-                style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+              Expanded(
+                child: Column(
+                  children: <Widget>[
+                    const Text(
+                      'Select Your Calories Limit',
+                      style: TextStyle(
+                          fontSize: 18.0, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 20),
+                    HorizontalPicker(
+                      minValue: 200,
+                      maxValue: 800,
+                      divisions: (800 - 200) ~/ 50,
+                      height: 120,
+                      suffix: " kcal",
+                      showCursor: true,
+                      backgroundColor: Colors.grey.shade200,
+                      activeItemTextColor: Colors.blue.shade800,
+                      passiveItemsTextColor: Colors.grey.shade500,
+                      onChanged: (value) {
+                        setState(() {
+                          caloriesLimit = value;
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    const Text(
+                      'Nutrients Proportion',
+                      style: TextStyle(
+                          fontSize: 18.0, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: <Widget>[
+                        Radio<MacronutrientProportion>(
+                          value: MacronutrientProportion.option1,
+                          groupValue: _selectedProportion,
+                          onChanged: _handleProportionChange,
+                          activeColor: Colors.blue[500],
+                        ),
+                        const Text(
+                          'Carbs 50%  Fats 35%  Proteins 15%',
+                          style: TextStyle(fontSize: 14.0),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: <Widget>[
+                        Radio<MacronutrientProportion>(
+                          value: MacronutrientProportion.option2,
+                          groupValue: _selectedProportion,
+                          onChanged: _handleProportionChange,
+                          activeColor: Colors.blue[500],
+                        ),
+                        const Text(
+                          'Carbs 40%  Fats 30%  Proteins 30%',
+                          style: TextStyle(fontSize: 14.0),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 20),
-              HorizontalPicker(
-                minValue: 200,
-                maxValue: 800,
-                divisions: (800 - 200) ~/ 50,
-                height: 120,
-                suffix: " kcal",
-                showCursor: true,
-                backgroundColor: Colors.grey.shade200,
-                activeItemTextColor: Colors.blue.shade800,
-                passiveItemsTextColor: Colors.grey.shade500,
-                onChanged: (value) {
-                  setState(() {
-                    caloriesLimit = value;
-                  });
-                },
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                'Select Nutrients Proportion',
-                style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  Radio<MacronutrientProportion>(
-                    value: MacronutrientProportion.option1,
-                    groupValue: _selectedProportion,
-                    onChanged: _handleProportionChange,
-                    activeColor: Colors.blue[500],
-                  ),
-                  const Text(
-                    'Carbs 50%  Fats 35%  Proteins 15%',
-                    style: TextStyle(fontSize: 14.0),
-                  ),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  Radio<MacronutrientProportion>(
-                    value: MacronutrientProportion.option2,
-                    groupValue: _selectedProportion,
-                    onChanged: _handleProportionChange,
-                    activeColor: Colors.blue[500],
-                  ),
-                  const Text(
-                    'Carbs 40%  Fats 30%  Proteins 30%',
-                    style: TextStyle(fontSize: 14.0),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _onNextPressed,
                 style: ElevatedButton.styleFrom(
@@ -142,13 +149,11 @@ class _HomeState extends State<Home> {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 24.0, vertical: 12.0),
                 ),
-                child: const Text(
-                  'Next',
-                  style: const TextStyle(
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white),
-                ),
+                child: const Text('Next',
+                    style: const TextStyle(
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white)),
               ),
             ],
           ),
