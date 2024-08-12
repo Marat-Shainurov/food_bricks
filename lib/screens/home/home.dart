@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:food_bricks/services/odoo_service.dart';
 import 'package:horizontal_picker/horizontal_picker.dart';
+import 'package:food_bricks/screens/solutions/solutions.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -14,8 +15,10 @@ enum MacronutrientProportion { option1, option2 }
 
 class _HomeState extends State<Home> {
   final OdooService odooService = OdooService('https://evo.migom.cloud');
+  // final OdooService odooService = OdooService('http://192.168.100.38:8069');
 
   dynamic sessionId = '';
+  dynamic solutions = [];
   double caloriesLimit = 200.0;
   double proteins = 15.0;
   double carbs = 50.0;
@@ -53,11 +56,30 @@ class _HomeState extends State<Home> {
     });
   }
 
-  void _onNextPressed() {
-    print('Carbs: $carbs');
-    print('Proteins: $proteins');
-    print('Fats: $fats');
-    print('caloriesLimit: $caloriesLimit');
+  Future<void> _onNextPressed() async {
+    try {
+      Map<String, dynamic> data = {
+        "caloriesLimit": caloriesLimit.toString(),
+        "proteins": proteins.toString(),
+        "carbs": carbs.toString(),
+        "fats": fats.toString(),
+      };
+
+      final fetchedSolutions =
+          await odooService.fetchRecipeSolutions(sessionId, data);
+      if (fetchedSolutions.isNotEmpty) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => SolutionsGrid(solutions: fetchedSolutions),
+          ),
+        );
+      } else {
+        print('No solutions found');
+      }
+    } catch (e) {
+      print('Error fetching solutions: $e');
+    }
   }
 
   @override
@@ -119,8 +141,8 @@ class _HomeState extends State<Home> {
                           activeColor: Colors.blue[500],
                         ),
                         const Text(
-                          'Carbs 50%  Fats 35%  Proteins 15%',
-                          style: TextStyle(fontSize: 14.0),
+                          'Carbs 50%   Fats 35%   Proteins 15%',
+                          style: TextStyle(fontSize: 16.0),
                         ),
                       ],
                     ),
@@ -134,8 +156,8 @@ class _HomeState extends State<Home> {
                           activeColor: Colors.blue[500],
                         ),
                         const Text(
-                          'Carbs 40%  Fats 30%  Proteins 30%',
-                          style: TextStyle(fontSize: 14.0),
+                          'Carbs 40%   Fats 30%   Proteins 30%',
+                          style: TextStyle(fontSize: 16.0),
                         ),
                       ],
                     ),
