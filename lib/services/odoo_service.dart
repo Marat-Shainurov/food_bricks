@@ -52,4 +52,30 @@ class OdooService {
     }
     return null;
   }
+
+  Future<List<dynamic>> fetchRecipeSolutions(
+      String sessionId, Map<String, dynamic> data) async {
+    final headers = {
+      "Cookie": "session_id=$sessionId",
+      'Content-Type': 'application/json',
+    };
+    final solutionsResponse = await http.post(
+      Uri.parse('$baseUrl/api/recipe_solutions'),
+      headers: headers,
+      body: json.encode(data),
+    );
+
+    if (solutionsResponse.statusCode == 200) {
+      final solutionsData = json.decode(solutionsResponse.body);
+      if (solutionsData is List) {
+        return solutionsData;
+      } else {
+        throw Exception(
+            "Unexpected response format: ${solutionsResponse.body}");
+      }
+    } else {
+      throw Exception(
+          'Failed to fetch solutions, Status Code: ${solutionsResponse.statusCode}');
+    }
+  }
 }
