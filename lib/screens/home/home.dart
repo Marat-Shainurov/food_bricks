@@ -14,8 +14,8 @@ class Home extends StatefulWidget {
 enum MacronutrientProportion { option1, option2 }
 
 class _HomeState extends State<Home> {
-  // final OdooService odooService = OdooService('https://evo.migom.cloud');
-  final OdooService odooService = OdooService('http://192.168.100.38:8069');
+  final OdooService odooService = OdooService('https://evo.migom.cloud');
+  // final OdooService odooService = OdooService('http://192.168.100.38:8069');
 
   dynamic sessionId = '';
   dynamic solutions = [];

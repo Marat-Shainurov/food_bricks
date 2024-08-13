@@ -1,3 +1,4 @@
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 
 class SolutionDetail extends StatelessWidget {
@@ -7,6 +8,7 @@ class SolutionDetail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final NumberFormat formatter = NumberFormat("###,###", "en_US");
     return Scaffold(
       appBar: AppBar(
         title: const Text("Solution Detail",
@@ -26,6 +28,21 @@ class SolutionDetail extends StatelessWidget {
                 fit: BoxFit.cover,
               ),
             ),
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0, right: 16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text(
+                    '${formatter.format(solution['price'].toInt())} VND',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12.0,
+                    ),
+                  ),
+                ],
+              ),
+            ),
             // Ingredients section
             Expanded(
               flex: 5,
@@ -38,7 +55,8 @@ class SolutionDetail extends StatelessWidget {
                     return ListTile(
                       title: Text(ingredient['name']),
                       subtitle: Text(
-                        "Quantity: ${ingredient['quantity']}\nCalories: ${ingredient['calories']}",
+                        "Weight: ${ingredient['serving_weight']}",
+                        // "Quantity: ${ingredient['serving_weight']}\nCalories: ${ingredient['calories']}",
                       ),
                     );
                   },
