@@ -78,4 +78,34 @@ class OdooService {
           'Failed to fetch solutions, Status Code: ${solutionsResponse.statusCode}');
     }
   }
+
+  Future<Map<String, dynamic>> createKitchenOrder(
+      String sessionId, String identifier) async {
+    final headers = {
+      "Cookie": "session_id=$sessionId",
+      'Content-Type': 'application/json',
+    };
+
+    final data = {
+      "identifier": identifier,
+    };
+
+    final orderResponse = await http.post(
+      Uri.parse('$baseUrl/api/create_kitchen_order'),
+      headers: headers,
+      body: json.encode(data),
+    );
+
+    if (orderResponse.statusCode == 200) {
+      final orderData = json.decode(orderResponse.body);
+      if (orderData is Map<String, dynamic>) {
+        return orderData;
+      } else {
+        throw Exception("Unexpected response format: ${orderResponse.body}");
+      }
+    } else {
+      throw Exception(
+          'Failed to create kitchen order, Status Code: ${orderResponse.statusCode}');
+    }
+  }
 }
