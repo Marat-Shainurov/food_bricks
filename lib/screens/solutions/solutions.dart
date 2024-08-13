@@ -1,12 +1,19 @@
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
+import 'package:food_bricks/services/odoo_service.dart';
+import 'solution_details.dart';
 
 class SolutionsGrid extends StatelessWidget {
   final List<dynamic> solutions;
+  final OdooService odooService;
 
-  const SolutionsGrid({Key? key, required this.solutions}) : super(key: key);
+  const SolutionsGrid(
+      {Key? key, required this.solutions, required this.odooService})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final NumberFormat formatter = NumberFormat("###,###", "en_US");
     return Scaffold(
       appBar: AppBar(
         title: const Text("Solutions",
@@ -26,50 +33,43 @@ class SolutionsGrid extends StatelessWidget {
           itemCount: solutions.length,
           itemBuilder: (context, index) {
             final solution = solutions[index];
-            return Card(
-              elevation: 4.0,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Expanded(
-                    child: Image.network(
-                      solution['treemap_image'],
-                      fit: BoxFit.cover,
-                    ),
+            return GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SolutionDetail(solution: solution),
                   ),
-                  Container(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Price: ${solution['price'].toInt()}',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12.0,
-                          ),
-                        ),
-                        ElevatedButton(
-                          onPressed: () {
-                            // Placeholder for the "Create Order" button
-                          },
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16.0, vertical: 8.0),
-                            backgroundColor: Colors.blue[500],
-                          ),
-                          child: const Text(
-                            'Order',
+                );
+              },
+              child: Card(
+                elevation: 4.0,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                      child: Image.network(
+                        solution['treemap_image'],
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            '${formatter.format(solution['price'].toInt())} VND',
                             style: const TextStyle(
-                                fontSize: 14.0,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12.0,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             );
           },

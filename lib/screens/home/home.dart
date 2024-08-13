@@ -14,12 +14,12 @@ class Home extends StatefulWidget {
 enum MacronutrientProportion { option1, option2 }
 
 class _HomeState extends State<Home> {
-  final OdooService odooService = OdooService('https://evo.migom.cloud');
-  // final OdooService odooService = OdooService('http://192.168.100.38:8069');
+  // final OdooService odooService = OdooService('https://evo.migom.cloud');
+  final OdooService odooService = OdooService('http://192.168.100.38:8069');
 
   dynamic sessionId = '';
   dynamic solutions = [];
-  double caloriesLimit = 200.0;
+  double caloriesLimit = 500.0;
   double proteins = 15.0;
   double carbs = 50.0;
   double fats = 35.0;
@@ -71,7 +71,10 @@ class _HomeState extends State<Home> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => SolutionsGrid(solutions: fetchedSolutions),
+            builder: (context) => SolutionsGrid(
+              solutions: fetchedSolutions,
+              odooService: odooService,
+            ),
           ),
         );
       } else {
