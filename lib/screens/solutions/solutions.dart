@@ -38,7 +38,10 @@ class SolutionsGrid extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => SolutionDetail(solution: solution),
+                    builder: (context) => SolutionDetail(
+                      solution: solution,
+                      odooService: odooService,
+                    ),
                   ),
                 );
               },

@@ -29,6 +29,7 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
+    print('Home widget initialized!');
     _fetchOdooSession();
   }
 
@@ -64,6 +65,11 @@ class _HomeState extends State<Home> {
         "carbs": carbs.toString(),
         "fats": fats.toString(),
       };
+
+      if (sessionId == null) {
+        print('Session ID is not available');
+        return;
+      }
 
       final fetchedSolutions =
           await odooService.fetchRecipeSolutions(sessionId, data);

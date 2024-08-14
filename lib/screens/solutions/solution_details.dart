@@ -1,10 +1,60 @@
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
+import 'package:food_bricks/services/odoo_service.dart';
 
-class SolutionDetail extends StatelessWidget {
+class SolutionDetail extends StatefulWidget {
   final dynamic solution;
+  final OdooService odooService;
 
-  const SolutionDetail({Key? key, required this.solution}) : super(key: key);
+  const SolutionDetail(
+      {Key? key, required this.solution, required this.odooService})
+      : super(key: key);
+
+  @override
+  _SolutionDetailState createState() => _SolutionDetailState();
+}
+
+class _SolutionDetailState extends State<SolutionDetail> {
+  dynamic sessionId;
+
+  @override
+  void initState() {
+    super.initState();
+    print('Solution details widget initialized!');
+    _fetchOdooSession();
+  }
+
+  Future<void> _fetchOdooSession() async {
+    try {
+      sessionId = await widget.odooService.fetchSessionId();
+      print('Fetched session id: $sessionId');
+    } catch (e) {
+      print('Error fetching session ID: $e');
+    }
+  }
+
+  Future<void> _onOrderPressed() async {
+    if (sessionId == null) {
+      print('Session ID is not available');
+      return;
+    }
+
+    try {
+      final identifier = widget.solution['identifier']
+          as String; // Ensure identifier is a String
+      final response =
+          await widget.odooService.createKitchenOrder(sessionId, identifier);
+
+      if (response != null) {
+        print('Order created with ID: ${response['order_identifier']}');
+        // Optionally, navigate to another page or show a confirmation dialog.
+      } else {
+        print('Failed to create order');
+      }
+    } catch (e) {
+      print('Error creating order: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +74,7 @@ class SolutionDetail extends StatelessWidget {
             Expanded(
               flex: 5,
               child: Image.network(
-                solution['treemap_image'],
+                widget.solution['treemap_image'],
                 fit: BoxFit.cover,
               ),
             ),
@@ -34,7 +84,7 @@ class SolutionDetail extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   Text(
-                    '${formatter.format(solution['price'].toInt())} VND',
+                    '${formatter.format(widget.solution['price'].toInt())} VND',
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 12.0,
@@ -49,14 +99,13 @@ class SolutionDetail extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: ListView.builder(
-                  itemCount: solution['ingredients'].length,
+                  itemCount: widget.solution['ingredients'].length,
                   itemBuilder: (context, index) {
-                    final ingredient = solution['ingredients'][index];
+                    final ingredient = widget.solution['ingredients'][index];
                     return ListTile(
                       title: Text(ingredient['name']),
                       subtitle: Text(
                         "Weight: ${ingredient['serving_weight']}",
-                        // "Quantity: ${ingredient['serving_weight']}\nCalories: ${ingredient['calories']}",
                       ),
                     );
                   },
@@ -64,12 +113,11 @@ class SolutionDetail extends StatelessWidget {
               ),
             ),
             // Order Button
+            // Order Button
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: ElevatedButton(
-                onPressed: () {
-                  // Placeholder for order button functionality
-                },
+                onPressed: _onOrderPressed,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue[500],
                   padding: const EdgeInsets.symmetric(
