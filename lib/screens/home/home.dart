@@ -57,7 +57,33 @@ class _HomeState extends State<Home> {
     });
   }
 
+  void _showLoaderDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible:
+          false, // Prevent closing the dialog by tapping outside
+      builder: (BuildContext context) {
+        return Dialog(
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(width: 20),
+                Text("Loading..."),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   Future<void> _onNextPressed() async {
+    // Show loader dialog
+    _showLoaderDialog(context);
+
     try {
       Map<String, dynamic> data = {
         "caloriesLimit": caloriesLimit.toString(),
@@ -68,11 +94,16 @@ class _HomeState extends State<Home> {
 
       if (sessionId == null) {
         print('Session ID is not available');
+        Navigator.pop(context); // Close the loader
         return;
       }
 
       final fetchedSolutions =
           await odooService.fetchRecipeSolutions(sessionId, data);
+
+      // Close the loader once the request is complete
+      Navigator.pop(context);
+
       if (fetchedSolutions.isNotEmpty) {
         Navigator.push(
           context,
@@ -87,6 +118,8 @@ class _HomeState extends State<Home> {
         print('No solutions found');
       }
     } catch (e) {
+      // Close the loader in case of error
+      Navigator.pop(context);
       print('Error fetching solutions: $e');
     }
   }
