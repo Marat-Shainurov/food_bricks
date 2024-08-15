@@ -1,6 +1,7 @@
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:food_bricks/services/odoo_service.dart';
+import 'package:food_bricks/screens/solutions/order_confirmation.dart';
 
 class SolutionDetail extends StatefulWidget {
   final dynamic solution;
@@ -40,14 +41,23 @@ class _SolutionDetailState extends State<SolutionDetail> {
     }
 
     try {
-      final identifier = widget.solution['identifier']
-          as String; // Ensure identifier is a String
+      final identifier = widget.solution['identifier'] as String;
       final response =
           await widget.odooService.createKitchenOrder(sessionId, identifier);
 
       if (response != null) {
         print('Order created with ID: ${response['order_identifier']}');
-        // Optionally, navigate to another page or show a confirmation dialog.
+
+        // Navigate to another page or show confirmation
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => OrderConfirmation(
+              response: response,
+              solution: widget.solution,
+            ),
+          ),
+        );
       } else {
         print('Failed to create order');
       }
