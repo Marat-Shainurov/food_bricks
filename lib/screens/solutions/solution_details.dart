@@ -71,7 +71,7 @@ class _SolutionDetailState extends State<SolutionDetail> {
     final NumberFormat formatter = NumberFormat("###,###", "en_US");
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Solution Detail",
+        title: const Text("Solution Details",
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.blue[500],
         centerTitle: true,

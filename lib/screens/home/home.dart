@@ -140,6 +140,7 @@ class _HomeState extends State<Home> {
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               Expanded(
                 child: Column(
@@ -206,18 +207,21 @@ class _HomeState extends State<Home> {
                   ],
                 ),
               ),
-              ElevatedButton(
-                onPressed: _onNextPressed,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue[500],
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 24.0, vertical: 12.0),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: ElevatedButton(
+                  onPressed: _onNextPressed,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue[500],
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24.0, vertical: 12.0),
+                  ),
+                  child: const Text('Next',
+                      style: TextStyle(
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white)),
                 ),
-                child: const Text('Next',
-                    style: const TextStyle(
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white)),
               ),
             ],
           ),
