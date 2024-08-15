@@ -53,7 +53,7 @@ class SolutionsGrid extends StatelessWidget {
                     Expanded(
                       child: Image.network(
                         solution['treemap_image'],
-                        fit: BoxFit.cover,
+                        fit: BoxFit.fitWidth,
                       ),
                     ),
                     Container(

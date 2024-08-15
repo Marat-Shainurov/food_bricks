@@ -70,24 +70,32 @@ class _SolutionDetailState extends State<SolutionDetail> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            // Image section
-            Expanded(
-              flex: 5,
-              child: Image.network(
-                widget.solution['treemap_image'],
-                fit: BoxFit.cover,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 8.0, right: 16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+            // Image and price section wrapped in a Card
+            Card(
+              margin: const EdgeInsets.all(16.0),
+              elevation: 4.0,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(
-                    '${formatter.format(widget.solution['price'].toInt())} VND',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12.0,
+                  // Image section
+                  Container(
+                    height: MediaQuery.of(context).size.height *
+                        0.45, // 40% of screen height
+                    child: Image.network(
+                      widget.solution['treemap_image'],
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                  // Price section
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      '${formatter.format(widget.solution['price'].toInt())} VND',
+                      textAlign: TextAlign.left,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14.0,
+                      ),
                     ),
                   ),
                 ],
@@ -104,15 +112,15 @@ class _SolutionDetailState extends State<SolutionDetail> {
                     final ingredient = widget.solution['ingredients'][index];
                     return ListTile(
                       title: Text(ingredient['name']),
-                      subtitle: Text(
-                        "Weight: ${ingredient['serving_weight']}",
-                      ),
+                      subtitle: Text("${ingredient['serving_weight']} g",
+                          style: const TextStyle(
+                            fontSize: 12.0,
+                          )),
                     );
                   },
                 ),
               ),
             ),
-            // Order Button
             // Order Button
             Padding(
               padding: const EdgeInsets.all(16.0),
