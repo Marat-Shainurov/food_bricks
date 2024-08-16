@@ -34,6 +34,10 @@ class _constructorsHomeState extends State<constructorsHome> {
   }
 
   Future<void> _fetchSessionAndConstructors() async {
+    setState(() {
+      isLoading =
+          true; // Set loading state to true when fetching data for refreshing
+    });
     try {
       await _fetchOdooSession();
       final fetchedConstructors =
@@ -57,6 +61,14 @@ class _constructorsHomeState extends State<constructorsHome> {
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.blue[500],
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.refresh),
+            color: Colors.white,
+            onPressed:
+                _fetchSessionAndConstructors, // Refresh the orders when pressed
+          ),
+        ],
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
