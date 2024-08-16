@@ -6,9 +6,13 @@ import 'package:food_bricks/screens/solutions/order_confirmation.dart';
 class SolutionDetail extends StatefulWidget {
   final dynamic solution;
   final OdooService odooService;
+  final String constructorId;
 
   const SolutionDetail(
-      {Key? key, required this.solution, required this.odooService})
+      {Key? key,
+      required this.solution,
+      required this.odooService,
+      required this.constructorId})
       : super(key: key);
 
   @override

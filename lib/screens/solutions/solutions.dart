@@ -3,14 +3,23 @@ import 'package:flutter/material.dart';
 import 'package:food_bricks/services/odoo_service.dart';
 import 'solution_details.dart';
 
-class SolutionsGrid extends StatelessWidget {
+class SolutionsGrid extends StatefulWidget {
+  final String constructorId;
   final List<dynamic> solutions;
   final OdooService odooService;
 
   const SolutionsGrid(
-      {Key? key, required this.solutions, required this.odooService})
+      {Key? key,
+      required this.solutions,
+      required this.odooService,
+      required this.constructorId})
       : super(key: key);
 
+  @override
+  _SolutionsGridState createState() => _SolutionsGridState();
+}
+
+class _SolutionsGridState extends State<SolutionsGrid> {
   @override
   Widget build(BuildContext context) {
     final NumberFormat formatter = NumberFormat("###,###", "en_US");
@@ -30,18 +39,18 @@ class SolutionsGrid extends StatelessWidget {
             mainAxisSpacing: 16.0,
             childAspectRatio: 0.75,
           ),
-          itemCount: solutions.length,
+          itemCount: widget.solutions.length,
           itemBuilder: (context, index) {
-            final solution = solutions[index];
+            final solution = widget.solutions[index];
             return GestureDetector(
               onTap: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => SolutionDetail(
-                      solution: solution,
-                      odooService: odooService,
-                    ),
+                        solution: solution,
+                        odooService: widget.odooService,
+                        constructorId: widget.constructorId),
                   ),
                 );
               },

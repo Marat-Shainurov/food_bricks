@@ -5,7 +5,11 @@ import 'package:horizontal_picker/horizontal_picker.dart';
 import 'package:food_bricks/screens/solutions/solutions.dart';
 
 class Home extends StatefulWidget {
-  const Home({super.key});
+  final String constructorId;
+  final String constructorName;
+
+  const Home(
+      {super.key, required this.constructorId, required this.constructorName});
 
   @override
   _HomeState createState() => _HomeState();
@@ -16,7 +20,6 @@ enum MacronutrientProportion { option1, option2 }
 class _HomeState extends State<Home> {
   final OdooService odooService = OdooService('https://evo.migom.cloud');
   // final OdooService odooService = OdooService('http://192.168.100.38:8069');
-
   dynamic sessionId = '';
   dynamic solutions = [];
   double caloriesLimit = 500.0;
@@ -90,6 +93,7 @@ class _HomeState extends State<Home> {
         "proteins": proteins.toString(),
         "carbs": carbs.toString(),
         "fats": fats.toString(),
+        "constructor_id": widget.constructorId
       };
 
       if (sessionId == null) {
@@ -111,6 +115,7 @@ class _HomeState extends State<Home> {
             builder: (context) => SolutionsGrid(
               solutions: fetchedSolutions,
               odooService: odooService,
+              constructorId: widget.constructorId,
             ),
           ),
         );
@@ -128,8 +133,8 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          "Food Bricks",
+        title: Text(
+          widget.constructorName,
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.blue[500],
