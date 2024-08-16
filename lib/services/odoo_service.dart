@@ -79,6 +79,29 @@ class OdooService {
     }
   }
 
+  Future<dynamic> fetchConstructors(String sessionId) async {
+    final headers = {
+      "Cookie": "session_id=$sessionId",
+      'Content-Type': 'application/json',
+    };
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/constructors'),
+      headers: headers,
+    );
+
+    if (response.statusCode == 200) {
+      final solutionsData = json.decode(response.body);
+      if (solutionsData is List) {
+        return solutionsData;
+      } else {
+        throw Exception("Unexpected response format: ${response.body}");
+      }
+    } else {
+      throw Exception(
+          'Failed to fetch constructors, Status Code: ${response.statusCode}');
+    }
+  }
+
   Future<Map<String, dynamic>> createKitchenOrder(
       String sessionId, String identifier) async {
     final headers = {
