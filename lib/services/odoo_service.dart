@@ -79,6 +79,32 @@ class OdooService {
     }
   }
 
+  Future<List<dynamic>> fetchStrategies(
+      String sessionId, Map<String, dynamic> data) async {
+    final headers = {
+      "Cookie": "session_id=$sessionId",
+      'Content-Type': 'application/json',
+    };
+    final strategiesResponse = await http.post(
+      Uri.parse('$baseUrl/api/strategies'),
+      headers: headers,
+      body: json.encode(data),
+    );
+
+    if (strategiesResponse.statusCode == 200) {
+      final strategiesData = json.decode(strategiesResponse.body);
+      if (strategiesData is List) {
+        return strategiesData;
+      } else {
+        throw Exception(
+            "Unexpected response format: ${strategiesResponse.body}");
+      }
+    } else {
+      throw Exception(
+          'Failed to fetch solutions, Status Code: ${strategiesResponse.statusCode}');
+    }
+  }
+
   Future<dynamic> fetchConstructors(String sessionId) async {
     final headers = {
       "Cookie": "session_id=$sessionId",
