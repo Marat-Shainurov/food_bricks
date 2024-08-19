@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:food_bricks/services/odoo_service.dart';
+import 'package:food_bricks/services/utils.dart';
 import 'package:horizontal_picker/horizontal_picker.dart';
 import 'package:food_bricks/screens/solutions/solutions.dart';
 
@@ -29,6 +30,7 @@ class _HomeState extends State<Home> {
   double fats = 35.0;
   MacronutrientProportion? _selectedProportion =
       MacronutrientProportion.option1;
+  Utils utils = Utils();
 
   @override
   void initState() {
@@ -61,32 +63,9 @@ class _HomeState extends State<Home> {
     });
   }
 
-  void _showLoaderDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      barrierDismissible:
-          false, // Prevent closing the dialog by tapping outside
-      builder: (BuildContext context) {
-        return Dialog(
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CircularProgressIndicator(),
-                SizedBox(width: 20),
-                Text("Loading..."),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
   Future<void> _onNextPressed() async {
     // Show loader dialog
-    _showLoaderDialog(context);
+    utils.showLoaderDialog(context);
 
     try {
       Map<String, dynamic> data = {
