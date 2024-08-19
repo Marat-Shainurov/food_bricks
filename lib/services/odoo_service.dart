@@ -101,7 +101,32 @@ class OdooService {
       }
     } else {
       throw Exception(
-          'Failed to fetch solutions, Status Code: ${strategiesResponse.statusCode}');
+          'Failed to fetch strategies, Status Code: ${strategiesResponse.statusCode}');
+    }
+  }
+
+  Future<List<dynamic>> fetchStrategyRations(
+      String sessionId, Map<String, dynamic> data) async {
+    final headers = {
+      "Cookie": "session_id=$sessionId",
+      'Content-Type': 'application/json',
+    };
+    final rationsResponse = await http.post(
+      Uri.parse('$baseUrl/api/rations'),
+      headers: headers,
+      body: json.encode(data),
+    );
+
+    if (rationsResponse.statusCode == 200) {
+      final strategiesData = json.decode(rationsResponse.body);
+      if (strategiesData is List) {
+        return strategiesData;
+      } else {
+        throw Exception("Unexpected response format: ${rationsResponse.body}");
+      }
+    } else {
+      throw Exception(
+          'Failed to fetch rations, Status Code: ${rationsResponse.statusCode}');
     }
   }
 
