@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:food_bricks/services/odoo_service.dart';
 import 'package:food_bricks/screens/home/home.dart';
+import 'package:food_bricks/screens/plan/plan_home.dart';
 
 class constructorsHome extends StatefulWidget {
   const constructorsHome({super.key});
@@ -12,6 +13,8 @@ class constructorsHome extends StatefulWidget {
 
 class _constructorsHomeState extends State<constructorsHome> {
   final OdooService odooService = OdooService('https://evo.migom.cloud');
+  // final OdooService odooService = OdooService('http://192.168.100.38:8069');
+  // final OdooService odooService = OdooService('http://127.0.0.1:8069');
 
   dynamic sessionId = '';
   dynamic constructors = [];
@@ -81,18 +84,28 @@ class _constructorsHomeState extends State<constructorsHome> {
                     itemBuilder: (context, index) {
                       // First card: "Daily Plan" (non-clickable)
                       if (index == 0) {
-                        return const Card(
-                          margin: EdgeInsets.only(bottom: 16.0),
-                          elevation: 4.0,
-                          child: Padding(
-                            padding: EdgeInsets.all(16.0),
-                            child: Text(
-                              'Daily plan',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18.0,
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const Plan(),
                               ),
-                              textAlign: TextAlign.center,
+                            );
+                          },
+                          child: const Card(
+                            margin: EdgeInsets.only(bottom: 16.0),
+                            elevation: 4.0,
+                            child: Padding(
+                              padding: EdgeInsets.all(16.0),
+                              child: Text(
+                                'Daily plan',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18.0,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
                             ),
                           ),
                         );

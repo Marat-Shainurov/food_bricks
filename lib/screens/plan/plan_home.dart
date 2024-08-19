@@ -2,38 +2,37 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:food_bricks/services/odoo_service.dart';
 import 'package:horizontal_picker/horizontal_picker.dart';
-import 'package:food_bricks/screens/solutions/solutions.dart';
+import 'package:food_bricks/services/utils.dart';
+import 'package:food_bricks/screens/plan/plan_strategies.dart';
 
-class Home extends StatefulWidget {
-  final String constructorId;
-  final String constructorName;
-
-  const Home(
-      {super.key, required this.constructorId, required this.constructorName});
+class Plan extends StatefulWidget {
+  const Plan({super.key});
 
   @override
-  _HomeState createState() => _HomeState();
+  _PlanState createState() => _PlanState();
 }
 
-enum MacronutrientProportion { option1, option2 }
+enum PlanMacronutrientProportion { option1, option2 }
 
-class _HomeState extends State<Home> {
+class _PlanState extends State<Plan> {
   final OdooService odooService = OdooService('https://evo.migom.cloud');
+  final Utils utils = Utils();
   // final OdooService odooService = OdooService('http://192.168.100.38:8069');
   // final OdooService odooService = OdooService('http://127.0.0.1:8069');
+
   dynamic sessionId = '';
-  dynamic solutions = [];
-  double caloriesLimit = 500.0;
+  dynamic strategies = [];
+  double caloriesLimit = 2200.0;
   double proteins = 15.0;
   double carbs = 50.0;
   double fats = 35.0;
-  MacronutrientProportion? _selectedProportion =
-      MacronutrientProportion.option1;
+  PlanMacronutrientProportion? _selectedPlanProportion =
+      PlanMacronutrientProportion.option1;
 
   @override
   void initState() {
     super.initState();
-    print('Home widget initialized!');
+    print('Plan home widget initialized!');
     _fetchOdooSession();
   }
 
@@ -46,14 +45,14 @@ class _HomeState extends State<Home> {
     }
   }
 
-  void _handleProportionChange(MacronutrientProportion? value) {
+  void _handleProportionChange(PlanMacronutrientProportion? value) {
     setState(() {
-      _selectedProportion = value;
-      if (value == MacronutrientProportion.option1) {
+      _selectedPlanProportion = value;
+      if (value == PlanMacronutrientProportion.option1) {
         proteins = 15.0;
         carbs = 50.0;
         fats = 35.0;
-      } else if (value == MacronutrientProportion.option2) {
+      } else if (value == PlanMacronutrientProportion.option2) {
         proteins = 30.0;
         carbs = 40.0;
         fats = 30.0;
@@ -61,32 +60,9 @@ class _HomeState extends State<Home> {
     });
   }
 
-  void _showLoaderDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      barrierDismissible:
-          false, // Prevent closing the dialog by tapping outside
-      builder: (BuildContext context) {
-        return Dialog(
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CircularProgressIndicator(),
-                SizedBox(width: 20),
-                Text("Loading..."),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
   Future<void> _onNextPressed() async {
     // Show loader dialog
-    _showLoaderDialog(context);
+    utils.showLoaderDialog(context);
 
     try {
       Map<String, dynamic> data = {
@@ -94,39 +70,37 @@ class _HomeState extends State<Home> {
         "proteins": proteins.toString(),
         "carbs": carbs.toString(),
         "fats": fats.toString(),
-        "constructor_id": widget.constructorId
       };
 
       if (sessionId == null) {
         print('Session ID is not available');
-        Navigator.pop(context); // Close the loader
+        // Navigator.pop(context); // Close the loader
         return;
       }
 
-      final fetchedSolutions =
-          await odooService.fetchRecipeSolutions(sessionId, data);
+      final fetchedStrategies =
+          await odooService.fetchStrategies(sessionId, data);
 
       // Close the loader once the request is complete
       Navigator.pop(context);
 
-      if (fetchedSolutions.isNotEmpty) {
+      if (fetchedStrategies.isNotEmpty) {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => SolutionsGrid(
-              solutions: fetchedSolutions,
+            builder: (context) => StrategiesGrid(
+              strategies: fetchedStrategies,
               odooService: odooService,
-              constructorId: widget.constructorId,
             ),
           ),
         );
       } else {
-        print('No solutions found');
+        print('No plan versions found');
       }
     } catch (e) {
       // Close the loader in case of error
       Navigator.pop(context);
-      print('Error fetching solutions: $e');
+      print('Error fetching plan versions: $e');
     }
   }
 
@@ -134,8 +108,8 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          widget.constructorName,
+        title: const Text(
+          'Recipe Plan',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.blue[500],
@@ -158,9 +132,9 @@ class _HomeState extends State<Home> {
                     ),
                     const SizedBox(height: 20),
                     HorizontalPicker(
-                      minValue: 200,
-                      maxValue: 800,
-                      divisions: (800 - 200) ~/ 50,
+                      minValue: 1200,
+                      maxValue: 3200,
+                      divisions: (3200 - 1200) ~/ 100,
                       height: 120,
                       suffix: " kcal",
                       showCursor: true,
@@ -183,9 +157,9 @@ class _HomeState extends State<Home> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: <Widget>[
-                        Radio<MacronutrientProportion>(
-                          value: MacronutrientProportion.option1,
-                          groupValue: _selectedProportion,
+                        Radio<PlanMacronutrientProportion>(
+                          value: PlanMacronutrientProportion.option1,
+                          groupValue: _selectedPlanProportion,
                           onChanged: _handleProportionChange,
                           activeColor: Colors.blue[500],
                         ),
@@ -198,9 +172,9 @@ class _HomeState extends State<Home> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: <Widget>[
-                        Radio<MacronutrientProportion>(
-                          value: MacronutrientProportion.option2,
-                          groupValue: _selectedProportion,
+                        Radio<PlanMacronutrientProportion>(
+                          value: PlanMacronutrientProportion.option2,
+                          groupValue: _selectedPlanProportion,
                           onChanged: _handleProportionChange,
                           activeColor: Colors.blue[500],
                         ),
