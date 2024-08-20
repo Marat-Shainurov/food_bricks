@@ -18,13 +18,14 @@ class _constructorsHomeState extends State<constructorsHome> {
 
   dynamic sessionId = '';
   dynamic constructors = [];
+  dynamic restaurants = [];
   bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
     print('Constructors widget initialized!');
-    _fetchSessionAndConstructors();
+    _fetchSessionAndData();
   }
 
   Future<void> _fetchOdooSession() async {
@@ -36,7 +37,7 @@ class _constructorsHomeState extends State<constructorsHome> {
     }
   }
 
-  Future<void> _fetchSessionAndConstructors() async {
+  Future<void> _fetchSessionAndData() async {
     setState(() {
       isLoading =
           true; // Set loading state to true when fetching data for refreshing
@@ -45,11 +46,15 @@ class _constructorsHomeState extends State<constructorsHome> {
       await _fetchOdooSession();
       final fetchedConstructors =
           await odooService.fetchConstructors(sessionId);
+      final fetchedRestaurants = await odooService.fetchRestaurants(sessionId);
       setState(() {
         constructors = fetchedConstructors;
+        restaurants = fetchedRestaurants;
         isLoading = false;
       });
       print('Fetched constructors: $constructors');
+      print('-----------------------------------');
+      print('Fetched restaurants: $restaurants');
     } catch (e) {
       setState(() {});
       print('Error fetching constructors: $e');
@@ -68,8 +73,7 @@ class _constructorsHomeState extends State<constructorsHome> {
           IconButton(
             icon: Icon(Icons.refresh),
             color: Colors.white,
-            onPressed:
-                _fetchSessionAndConstructors, // Refresh the orders when pressed
+            onPressed: _fetchSessionAndData, // Refresh the orders when pressed
           ),
         ],
       ),
@@ -80,39 +84,9 @@ class _constructorsHomeState extends State<constructorsHome> {
               : Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: ListView.builder(
-                    itemCount: constructors.length + 1, // +1 for the extra card
+                    itemCount: constructors.length,
                     itemBuilder: (context, index) {
-                      // First card: "Daily Plan" (non-clickable)
-                      if (index == 0) {
-                        return GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const Plan(),
-                              ),
-                            );
-                          },
-                          child: const Card(
-                            margin: EdgeInsets.only(bottom: 16.0),
-                            elevation: 4.0,
-                            child: Padding(
-                              padding: EdgeInsets.all(16.0),
-                              child: Text(
-                                'Daily plan',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18.0,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ),
-                        );
-                      }
-                      // Remaining cards: constructor names (clickable)
-                      final constructor =
-                          constructors[index - 1]; // Adjust index
+                      final constructor = constructors[index];
                       return GestureDetector(
                         onTap: () {
                           Navigator.push(
