@@ -153,6 +153,29 @@ class OdooService {
     }
   }
 
+  Future<dynamic> fetchRestaurants(String sessionId) async {
+    final headers = {
+      "Cookie": "session_id=$sessionId",
+      'Content-Type': 'application/json',
+    };
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/restaurants'),
+      headers: headers,
+    );
+
+    if (response.statusCode == 200) {
+      final restaurantsData = json.decode(response.body);
+      if (restaurantsData is List) {
+        return restaurantsData;
+      } else {
+        throw Exception({response.body});
+      }
+    } else {
+      throw Exception(
+          'Failed to fetch restaursnts, Status Code: ${response.statusCode}');
+    }
+  }
+
   Future<Map<String, dynamic>> createKitchenOrder(
       String sessionId, String identifier) async {
     final headers = {
