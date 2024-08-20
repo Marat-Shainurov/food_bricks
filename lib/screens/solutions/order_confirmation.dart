@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:food_bricks/screens/home/home.dart';
-import 'package:food_bricks/screens/home/constructors_home.dart';
+import 'package:food_bricks/screens/wrapper.dart';
 
 class OrderConfirmation extends StatelessWidget {
   final dynamic response;
@@ -73,7 +72,7 @@ class OrderConfirmation extends StatelessWidget {
                 Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const constructorsHome(),
+                    builder: (context) => const Wrapper(),
                   ),
                   (route) => false, // Remove all previous routes
                 );

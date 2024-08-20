@@ -7,12 +7,14 @@ class SolutionDetail extends StatefulWidget {
   final dynamic solution;
   final OdooService odooService;
   final String constructorId;
+  final String restaurantId;
 
   const SolutionDetail(
       {Key? key,
       required this.solution,
       required this.odooService,
-      required this.constructorId})
+      required this.constructorId,
+      required this.restaurantId})
       : super(key: key);
 
   @override
@@ -46,8 +48,9 @@ class _SolutionDetailState extends State<SolutionDetail> {
 
     try {
       final identifier = widget.solution['identifier'] as String;
-      final response =
-          await widget.odooService.createKitchenOrder(sessionId, identifier);
+      final restaurant = widget.restaurantId;
+      final response = await widget.odooService
+          .createKitchenOrder(sessionId, identifier, restaurant);
 
       if (response != null) {
         print('Order created with ID: ${response['order_identifier']}');

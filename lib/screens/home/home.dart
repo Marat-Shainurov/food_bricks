@@ -8,9 +8,13 @@ import 'package:food_bricks/screens/solutions/solutions.dart';
 class Home extends StatefulWidget {
   final String constructorId;
   final String constructorName;
+  final String restaurantId;
 
   const Home(
-      {super.key, required this.constructorId, required this.constructorName});
+      {super.key,
+      required this.constructorId,
+      required this.constructorName,
+      required this.restaurantId});
 
   @override
   _HomeState createState() => _HomeState();
@@ -93,10 +97,10 @@ class _HomeState extends State<Home> {
           context,
           MaterialPageRoute(
             builder: (context) => SolutionsGrid(
-              solutions: fetchedSolutions,
-              odooService: odooService,
-              constructorId: widget.constructorId,
-            ),
+                solutions: fetchedSolutions,
+                odooService: odooService,
+                constructorId: widget.constructorId,
+                restaurantId: widget.restaurantId),
           ),
         );
       } else {
