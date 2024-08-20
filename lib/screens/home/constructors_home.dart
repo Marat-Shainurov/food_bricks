@@ -21,6 +21,9 @@ class _constructorsHomeState extends State<constructorsHome> {
   dynamic restaurants = [];
   bool isLoading = true;
 
+  dynamic selectedRestaurant;
+  dynamic selectedRestaurantId;
+
   @override
   void initState() {
     super.initState();
@@ -45,7 +48,7 @@ class _constructorsHomeState extends State<constructorsHome> {
     try {
       await _fetchOdooSession();
       final fetchedConstructors =
-          await odooService.fetchConstructors(sessionId);
+          await odooService.fetchConstructors(sessionId, selectedRestaurantId);
       final fetchedRestaurants = await odooService.fetchRestaurants(sessionId);
       setState(() {
         constructors = fetchedConstructors;
@@ -65,13 +68,48 @@ class _constructorsHomeState extends State<constructorsHome> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Power Station",
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: isLoading
+            ? const Text("Loading...",
+                style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18))
+            : DropdownButton<String>(
+                value: selectedRestaurant,
+                hint: const Text(
+                  "Select Restaurant",
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18),
+                ),
+                items: restaurants.map<DropdownMenuItem<String>>((restaurant) {
+                  return DropdownMenuItem<String>(
+                    value: restaurant['name'],
+                    child: Text(
+                      restaurant['name'],
+                      style: const TextStyle(color: Colors.white), // White text
+                    ),
+                  );
+                }).toList(),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    selectedRestaurant = newValue;
+                    // Store the identifier of the selected restaurant
+                    selectedRestaurantId = restaurants.firstWhere(
+                        (restaurant) =>
+                            restaurant['name'] == newValue)['identifier'];
+                  });
+                  _fetchSessionAndData();
+                },
+                dropdownColor: Colors.blue[500],
+                style: const TextStyle(color: Colors.black),
+              ),
         backgroundColor: Colors.blue[500],
         centerTitle: true,
         actions: [
           IconButton(
-            icon: Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh),
             color: Colors.white,
             onPressed: _fetchSessionAndData, // Refresh the orders when pressed
           ),
@@ -89,16 +127,37 @@ class _constructorsHomeState extends State<constructorsHome> {
                       final constructor = constructors[index];
                       return GestureDetector(
                         onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => Home(
-                                constructorId:
-                                    constructor['identifier'] as String,
-                                constructorName: constructor['name'] as String,
+                          if (selectedRestaurantId != null) {
+                            // If restaurant is selected, proceed to constructor widget
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => Home(
+                                    constructorId: constructor['identifier'],
+                                    constructorName: constructor['name'],
+                                    restaurantId: selectedRestaurantId!),
                               ),
-                            ),
-                          );
+                            );
+                          } else {
+                            // If no restaurant selected, show popup
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  content: const Text(
+                                      "You have to select a restaurant first."),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      child: const Text("OK"),
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          }
                         },
                         child: Card(
                           margin: const EdgeInsets.only(bottom: 16.0),
