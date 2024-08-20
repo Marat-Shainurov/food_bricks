@@ -130,14 +130,19 @@ class OdooService {
     }
   }
 
-  Future<dynamic> fetchConstructors(String sessionId) async {
+  Future<dynamic> fetchConstructors(
+      String sessionId, dynamic selectedRestaurantId) async {
     final headers = {
       "Cookie": "session_id=$sessionId",
       'Content-Type': 'application/json',
     };
+
+    Map<String, dynamic> data = {"identifier": selectedRestaurantId};
+
     final response = await http.post(
       Uri.parse('$baseUrl/api/constructors'),
       headers: headers,
+      body: json.encode(data),
     );
 
     if (response.statusCode == 200) {
@@ -145,7 +150,8 @@ class OdooService {
       if (solutionsData is List) {
         return solutionsData;
       } else {
-        throw Exception("Unexpected response format: ${response.body}");
+        print("Unexpected response format: ${response.body}");
+        return [];
       }
     } else {
       throw Exception(
@@ -177,7 +183,7 @@ class OdooService {
   }
 
   Future<Map<String, dynamic>> createKitchenOrder(
-      String sessionId, String identifier) async {
+      String sessionId, String identifier, String restaurant) async {
     final headers = {
       "Cookie": "session_id=$sessionId",
       'Content-Type': 'application/json',
@@ -185,6 +191,7 @@ class OdooService {
 
     final data = {
       "identifier": identifier,
+      "restaurant_identifier": restaurant
     };
 
     final orderResponse = await http.post(
