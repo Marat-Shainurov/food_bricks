@@ -5,7 +5,16 @@ import 'package:food_bricks/screens/home/home.dart';
 import 'package:food_bricks/screens/plan/plan_home.dart';
 
 class constructorsHome extends StatefulWidget {
-  const constructorsHome({super.key});
+  final String? selectedRestaurant;
+  final String? selectedRestaurantId;
+  final Function(String, String) setSelectedRestaurant;
+
+  const constructorsHome({
+    Key? key,
+    required this.selectedRestaurant,
+    required this.selectedRestaurantId,
+    required this.setSelectedRestaurant,
+  }) : super(key: key);
 
   @override
   _constructorsHomeState createState() => _constructorsHomeState();
@@ -20,9 +29,6 @@ class _constructorsHomeState extends State<constructorsHome> {
   dynamic constructors = [];
   dynamic restaurants = [];
   bool isLoading = true;
-
-  dynamic selectedRestaurant;
-  dynamic selectedRestaurantId;
 
   @override
   void initState() {
@@ -47,8 +53,8 @@ class _constructorsHomeState extends State<constructorsHome> {
     });
     try {
       await _fetchOdooSession();
-      final fetchedConstructors =
-          await odooService.fetchConstructors(sessionId, selectedRestaurantId);
+      final fetchedConstructors = await odooService.fetchConstructors(
+          sessionId, widget.selectedRestaurantId);
       final fetchedRestaurants = await odooService.fetchRestaurants(sessionId);
       setState(() {
         constructors = fetchedConstructors;
@@ -75,7 +81,7 @@ class _constructorsHomeState extends State<constructorsHome> {
                     fontWeight: FontWeight.bold,
                     fontSize: 18))
             : DropdownButton<String>(
-                value: selectedRestaurant,
+                value: widget.selectedRestaurant,
                 hint: const Text(
                   "Select Restaurant",
                   style: TextStyle(
@@ -93,17 +99,13 @@ class _constructorsHomeState extends State<constructorsHome> {
                   );
                 }).toList(),
                 onChanged: (String? newValue) {
-                  setState(() {
-                    selectedRestaurant = newValue;
-                    // Store the identifier of the selected restaurant
-                    selectedRestaurantId = restaurants.firstWhere(
-                        (restaurant) =>
-                            restaurant['name'] == newValue)['identifier'];
-                  });
+                  final selectedRestaurantId = restaurants.firstWhere(
+                      (restaurant) =>
+                          restaurant['name'] == newValue)['identifier'];
+                  widget.setSelectedRestaurant(newValue!, selectedRestaurantId);
                   _fetchSessionAndData();
                 },
                 dropdownColor: Colors.blue[500],
-                style: const TextStyle(color: Colors.black),
               ),
         backgroundColor: Colors.blue[500],
         centerTitle: true,
@@ -127,7 +129,7 @@ class _constructorsHomeState extends State<constructorsHome> {
                       final constructor = constructors[index];
                       return GestureDetector(
                         onTap: () {
-                          if (selectedRestaurantId != null) {
+                          if (widget.selectedRestaurantId != null) {
                             // If restaurant is selected, proceed to constructor widget
                             Navigator.push(
                               context,
@@ -135,7 +137,7 @@ class _constructorsHomeState extends State<constructorsHome> {
                                 builder: (context) => Home(
                                     constructorId: constructor['identifier'],
                                     constructorName: constructor['name'],
-                                    restaurantId: selectedRestaurantId!),
+                                    restaurantId: widget.selectedRestaurantId!),
                               ),
                             );
                           } else {

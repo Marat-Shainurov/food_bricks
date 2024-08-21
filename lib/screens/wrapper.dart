@@ -12,11 +12,24 @@ class Wrapper extends StatefulWidget {
 class _WrapperState extends State<Wrapper> {
   int _selectedIndex = 0;
 
+  // State variables to persist across navigation
+  String? selectedRestaurant;
+  String? selectedRestaurantId;
+
   // List of widgets to display for each tab
-  static const List<Widget> _widgetOptions = <Widget>[
-    Plan(), // Planner widget
-    constructorsHome(), // Constructors widget
-  ];
+  List<Widget> _widgetOptions(BuildContext context) => <Widget>[
+        const Plan(), // Planner widget
+        constructorsHome(
+          selectedRestaurant: selectedRestaurant,
+          selectedRestaurantId: selectedRestaurantId,
+          setSelectedRestaurant: (restaurant, restaurantId) {
+            setState(() {
+              selectedRestaurant = restaurant;
+              selectedRestaurantId = restaurantId;
+            });
+          },
+        ), // Constructors widget
+      ];
 
   void _onItemTapped(int index) {
     setState(() {
@@ -27,7 +40,8 @@ class _WrapperState extends State<Wrapper> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _widgetOptions[_selectedIndex], // Display the selected widget
+      body: _widgetOptions(
+          context)[_selectedIndex], // Display the selected widget
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
