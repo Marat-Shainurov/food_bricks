@@ -8,13 +8,15 @@ class SolutionsGrid extends StatefulWidget {
   final List<dynamic> solutions;
   final OdooService odooService;
   final String restaurantId;
+  final String selectedRestaurant;
 
   const SolutionsGrid(
       {Key? key,
       required this.solutions,
       required this.odooService,
       required this.constructorId,
-      required this.restaurantId})
+      required this.restaurantId,
+      required this.selectedRestaurant})
       : super(key: key);
 
   @override
@@ -53,7 +55,8 @@ class _SolutionsGridState extends State<SolutionsGrid> {
                         solution: solution,
                         odooService: widget.odooService,
                         constructorId: widget.constructorId,
-                        restaurantId: widget.restaurantId),
+                        restaurantId: widget.restaurantId,
+                        selectedRestaurant: widget.selectedRestaurant),
                   ),
                 );
               },

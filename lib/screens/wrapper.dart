@@ -3,7 +3,11 @@ import 'package:food_bricks/screens/plan/plan_home.dart';
 import 'package:food_bricks/screens/home/constructors_home.dart';
 
 class Wrapper extends StatefulWidget {
-  const Wrapper({Key? key}) : super(key: key);
+  final String? selectedRestaurant;
+  final String? selectedRestaurantId;
+
+  const Wrapper({Key? key, this.selectedRestaurant, this.selectedRestaurantId})
+      : super(key: key);
 
   @override
   _WrapperState createState() => _WrapperState();
@@ -12,9 +16,17 @@ class Wrapper extends StatefulWidget {
 class _WrapperState extends State<Wrapper> {
   int _selectedIndex = 0;
 
-  // State variables to persist across navigation
   String? selectedRestaurant;
   String? selectedRestaurantId;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Initialize state from widget if data is passed in
+    selectedRestaurant = widget.selectedRestaurant;
+    selectedRestaurantId = widget.selectedRestaurantId;
+  }
 
   // List of widgets to display for each tab
   List<Widget> _widgetOptions(BuildContext context) => <Widget>[

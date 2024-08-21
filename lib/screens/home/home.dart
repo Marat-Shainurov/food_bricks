@@ -9,12 +9,14 @@ class Home extends StatefulWidget {
   final String constructorId;
   final String constructorName;
   final String restaurantId;
+  final String selectedRestaurant;
 
   const Home(
       {super.key,
       required this.constructorId,
       required this.constructorName,
-      required this.restaurantId});
+      required this.restaurantId,
+      required this.selectedRestaurant});
 
   @override
   _HomeState createState() => _HomeState();
@@ -97,10 +99,12 @@ class _HomeState extends State<Home> {
           context,
           MaterialPageRoute(
             builder: (context) => SolutionsGrid(
-                solutions: fetchedSolutions,
-                odooService: odooService,
-                constructorId: widget.constructorId,
-                restaurantId: widget.restaurantId),
+              solutions: fetchedSolutions,
+              odooService: odooService,
+              constructorId: widget.constructorId,
+              restaurantId: widget.restaurantId,
+              selectedRestaurant: widget.selectedRestaurant,
+            ),
           ),
         );
       } else {

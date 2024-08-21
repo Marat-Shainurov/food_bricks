@@ -137,7 +137,9 @@ class _constructorsHomeState extends State<constructorsHome> {
                                 builder: (context) => Home(
                                     constructorId: constructor['identifier'],
                                     constructorName: constructor['name'],
-                                    restaurantId: widget.selectedRestaurantId!),
+                                    restaurantId: widget.selectedRestaurantId!,
+                                    selectedRestaurant:
+                                        widget.selectedRestaurant!),
                               ),
                             );
                           } else {

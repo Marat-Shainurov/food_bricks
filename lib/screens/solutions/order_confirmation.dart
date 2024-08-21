@@ -5,12 +5,16 @@ import 'package:food_bricks/screens/wrapper.dart';
 class OrderConfirmation extends StatelessWidget {
   final dynamic response;
   final dynamic solution;
+  final String restaurantId;
+  final String selectedRestaurant;
 
-  const OrderConfirmation({
-    Key? key,
-    required this.response,
-    required this.solution,
-  }) : super(key: key);
+  const OrderConfirmation(
+      {Key? key,
+      required this.response,
+      required this.solution,
+      required this.restaurantId,
+      required this.selectedRestaurant})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -72,9 +76,14 @@ class OrderConfirmation extends StatelessWidget {
                 Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const Wrapper(),
+                    builder: (context) => Wrapper(
+                      selectedRestaurant:
+                          selectedRestaurant, // Pass the restaurant name back
+                      selectedRestaurantId:
+                          restaurantId, // Pass the restaurantId back
+                    ),
                   ),
-                  (route) => false, // Remove all previous routes
+                  (Route<dynamic> route) => false,
                 );
               },
               style: ElevatedButton.styleFrom(

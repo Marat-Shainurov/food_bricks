@@ -8,13 +8,15 @@ class SolutionDetail extends StatefulWidget {
   final OdooService odooService;
   final String constructorId;
   final String restaurantId;
+  final String selectedRestaurant;
 
   const SolutionDetail(
       {Key? key,
       required this.solution,
       required this.odooService,
       required this.constructorId,
-      required this.restaurantId})
+      required this.restaurantId,
+      required this.selectedRestaurant})
       : super(key: key);
 
   @override
@@ -62,6 +64,8 @@ class _SolutionDetailState extends State<SolutionDetail> {
             builder: (context) => OrderConfirmation(
               response: response,
               solution: widget.solution,
+              restaurantId: widget.restaurantId,
+              selectedRestaurant: widget.selectedRestaurant,
             ),
           ),
         );

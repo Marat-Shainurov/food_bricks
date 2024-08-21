@@ -174,11 +174,12 @@ class OdooService {
       if (restaurantsData is List) {
         return restaurantsData;
       } else {
-        throw Exception({response.body});
+        print('Fetching restaurants error ${response.body}');
+        return [];
       }
     } else {
       throw Exception(
-          'Failed to fetch restaursnts, Status Code: ${response.statusCode}');
+          'Failed to fetch restaurants, Status Code: ${response.statusCode}');
     }
   }
 
