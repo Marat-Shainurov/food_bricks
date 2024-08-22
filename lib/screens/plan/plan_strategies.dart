@@ -91,21 +91,21 @@ class _StrategiesGridState extends State<StrategiesGrid> {
                             fit: BoxFit.fitWidth,
                           ),
                         ),
-                        Container(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                '${formatter.format(strategy['price'].toInt())} VND',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 12.0,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                        // Container(
+                        //   padding: const EdgeInsets.all(8.0),
+                        //   child: Row(
+                        //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        //     children: [
+                        //       Text(
+                        //         '${formatter.format(strategy['price'].toInt())} VND',
+                        //         style: const TextStyle(
+                        //           fontWeight: FontWeight.bold,
+                        //           fontSize: 12.0,
+                        //         ),
+                        //       ),
+                        //     ],
+                        //   ),
+                        // ),
                       ],
                     ),
                   ),
