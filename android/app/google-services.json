@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "84265252194",
+    "project_id": "powerstation-20341",
+    "storage_bucket": "powerstation-20341.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:84265252194:android:81ef1bfdddf4b336e4683b",
+        "android_client_info": {
+          "package_name": "com.example.food_bricks"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCU61qEGdOZAhvyd7aKpg9zSMePHSRY8iY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
