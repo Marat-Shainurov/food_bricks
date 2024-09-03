@@ -26,6 +26,8 @@ class UserProfile extends StatefulWidget {
 class _UserProfileState extends State<UserProfile> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _otpController = TextEditingController();
+  final TextEditingController _caloriesController = TextEditingController();
+  final TextEditingController _mealsPerDayController = TextEditingController();
 
   final Telephony telephony = Telephony.instance;
 
@@ -232,10 +234,144 @@ class _UserProfileState extends State<UserProfile> {
     });
   }
 
+  void _showCaloriesPopup(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Edit Daily Calories Intake'),
+          content: TextFormField(
+            controller: _caloriesController,
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              hintText: 'Enter calories',
+            ),
+            keyboardType: TextInputType.number,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                // TODO: Implement the Apply logic here
+                Navigator.pop(context);
+              },
+              child: Text('Apply'),
+            ),
+          ],
+        );
+      },
+    ).then((_) {
+      setState(() {
+        widget.clientData?['daily_calories'] = _caloriesController.text;
+      });
+    });
+  }
+
+  void _showMealsPerDayPopup(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Edit Meals Per Day'),
+          content: TextFormField(
+            controller: _caloriesController,
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              hintText: 'Enter meals per day',
+            ),
+            keyboardType: TextInputType.number,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                // TODO: Implement the Apply logic here
+                Navigator.pop(context);
+              },
+              child: Text('Apply'),
+            ),
+          ],
+        );
+      },
+    ).then((_) {
+      setState(() {
+        widget.clientData?['meals_per_day'] = _mealsPerDayController.text;
+      });
+    });
+  }
+
+  void _showSnacksDessertsPopup(BuildContext context) {
+    bool snacksSelected = widget.clientData?['eatsSnacks'] ?? false;
+    bool dessertsSelected = widget.clientData?['eatsDesserts'] ?? false;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Snacks and Desserts"),
+          content: StatefulBuilder(
+            builder: (context, setState) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CheckboxListTile(
+                    title: const Text("Eats snacks"),
+                    value: snacksSelected,
+                    onChanged: (bool? value) {
+                      setState(() {
+                        snacksSelected = value!;
+                      });
+                    },
+                  ),
+                  CheckboxListTile(
+                    title: const Text("Eats desserts"),
+                    value: dessertsSelected,
+                    onChanged: (bool? value) {
+                      setState(() {
+                        dessertsSelected = value!;
+                      });
+                    },
+                  ),
+                ],
+              );
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                // Save the selections
+                setState(() {
+                  widget.clientData!['eatsSnacks'] = snacksSelected;
+                  widget.clientData!['eatsDesserts'] = dessertsSelected;
+                });
+                Navigator.of(context).pop();
+              },
+              child: const Text("Apply"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final clientName = widget.clientData?['name'] ?? 'User';
     final diets = widget.clientData?['diets'] ?? [];
+    final dailyCalories = widget.clientData?['daily_calories'] ?? 'Not set yet';
+    final mealsPerDay = widget.clientData?['meals_per_day'] ?? 'Not set yet';
+    final eatsSnacks = widget.clientData?['eats_snacks'] ?? null;
+    final eatsDesserts = widget.clientData?['eats_desserts'] ?? null;
 
     return Scaffold(
       appBar: AppBar(
@@ -395,6 +531,125 @@ class _UserProfileState extends State<UserProfile> {
                                       ),
                                     ],
                                   ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    // Daily Calories Intake Card
+                    Card(
+                      elevation: 4,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Daily Calories Intake',
+                              style: TextStyle(
+                                  fontSize: 16.0, fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 20),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  dailyCalories != 'Not set yet'
+                                      ? '$dailyCalories cal'
+                                      : 'Not set yet',
+                                  style: TextStyle(fontSize: 16.0),
+                                ),
+                                ElevatedButton(
+                                  onPressed: () => _showCaloriesPopup(context),
+                                  child: Text(dailyCalories != 'Not set yet'
+                                      ? 'Edit'
+                                      : 'Add'),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    // Meals per day Card
+                    Card(
+                      elevation: 4,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Meals Per day',
+                              style: TextStyle(
+                                  fontSize: 16.0, fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 20),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  mealsPerDay != 'Not set yet'
+                                      ? '${mealsPerDay}'
+                                      : 'Not set yet',
+                                  style: TextStyle(fontSize: 16.0),
+                                ),
+                                ElevatedButton(
+                                  onPressed: () =>
+                                      _showMealsPerDayPopup(context),
+                                  child: Text(mealsPerDay != 'Not set yet'
+                                      ? 'Edit'
+                                      : 'Add'),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    // Snacks and Desserts Card
+                    Card(
+                      elevation: 4,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Snacks And Desserts',
+                              style: TextStyle(
+                                  fontSize: 16.0, fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 20),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Eats snacks: ${eatsSnacks != null ? (eatsSnacks ? 'Yes' : 'No') : 'Not set yet'}',
+                                      style: const TextStyle(fontSize: 16.0),
+                                    ),
+                                    const SizedBox(height: 10),
+                                    Text(
+                                      'Eats desserts: ${eatsDesserts != null ? (eatsDesserts ? 'Yes' : 'No') : 'Not set yet'}',
+                                      style: const TextStyle(fontSize: 16.0),
+                                    ),
+                                  ],
+                                ),
+                                ElevatedButton(
+                                  onPressed: () =>
+                                      _showSnacksDessertsPopup(context),
+                                  child: Text(
+                                      eatsSnacks == null || eatsDesserts == null
+                                          ? 'Add'
+                                          : 'Edit'),
+                                ),
+                              ],
+                            ),
                           ],
                         ),
                       ),
