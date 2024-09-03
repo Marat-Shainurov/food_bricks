@@ -211,6 +211,35 @@ class OdooService {
     }
   }
 
+  Future<dynamic> updateDiets(
+      String sessionId, List selectedDiets, String phoneNumber) async {
+    final headers = {
+      "Cookie": "session_id=$sessionId",
+      'Content-Type': 'application/json',
+    };
+
+    final data = {"selected_diets": selectedDiets, "client_phone": phoneNumber};
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/client/update_client_diets'),
+      headers: headers,
+      body: json.encode(data),
+    );
+
+    if (response.statusCode == 200) {
+      final updatedDietsData = json.decode(response.body);
+      if (updatedDietsData is Map<String, dynamic>) {
+        return updatedDietsData;
+      } else {
+        print('Updating diets error ${response.body}');
+        return [];
+      }
+    } else {
+      throw Exception(
+          'Failed to update diets, Status Code: ${response.statusCode}');
+    }
+  }
+
   Future<Map<String, dynamic>> createKitchenOrder(
       String sessionId, String identifier, String restaurant) async {
     final headers = {
