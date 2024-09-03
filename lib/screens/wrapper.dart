@@ -2,17 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:food_bricks/screens/plan/plan_home.dart';
 import 'package:food_bricks/screens/home/constructors_home.dart';
 import 'package:food_bricks/screens/user_profile/profile_login.dart';
+import 'package:food_bricks/services/odoo_service.dart';
 
 class Wrapper extends StatefulWidget {
   final String? selectedRestaurant;
   final String? selectedRestaurantId;
   final String? userPhone;
+  final Map? clientData;
 
   const Wrapper(
       {Key? key,
       this.selectedRestaurant,
       this.selectedRestaurantId,
-      this.userPhone})
+      this.userPhone,
+      this.clientData})
       : super(key: key);
 
   @override
@@ -25,6 +28,11 @@ class _WrapperState extends State<Wrapper> {
   String? selectedRestaurant;
   String? selectedRestaurantId;
   String? userPhone;
+  Map? clientData;
+
+  final OdooService odooService = OdooService('https://evo.migom.cloud');
+  // final OdooService odooService = OdooService('http://192.168.100.38:8069');
+  // final OdooService odooService = OdooService('http://127.0.0.1:8069');
 
   @override
   void initState() {
@@ -34,6 +42,7 @@ class _WrapperState extends State<Wrapper> {
     selectedRestaurant = widget.selectedRestaurant;
     selectedRestaurantId = widget.selectedRestaurantId;
     userPhone = widget.userPhone;
+    clientData = widget.clientData ?? {};
   }
 
   // List of widgets to display for each tab
@@ -51,6 +60,13 @@ class _WrapperState extends State<Wrapper> {
         ),
         UserProfile(
           userPhone: userPhone,
+          clientData: clientData,
+          odooService: odooService,
+          setClientData: (data) {
+            setState(() {
+              clientData = data;
+            });
+          },
           setUserPhone: (phone) {
             setState(() {
               userPhone = phone;
