@@ -127,7 +127,7 @@ class _UserProfileState extends State<UserProfile> {
     }
 
     final currentDiets = widget.clientData?['diets'] ?? [];
-    final selectedDiets = Set<String>.from(currentDiets);
+    final selectedDiets = List<String>.from(currentDiets);
 
     showDialog(
       context: context,
@@ -184,11 +184,34 @@ class _UserProfileState extends State<UserProfile> {
                   child: Text('Cancel'),
                 ),
                 ElevatedButton(
-                  onPressed: () {
-                    // Handle the Apply logic
-                    print('currentDiets - ${currentDiets}');
-                    print('selectedDiets - ${selectedDiets}');
-                    Navigator.pop(context, selectedDiets);
+                  onPressed: () async {
+                    // Send the newly selected diets to Odoo
+                    try {
+                      final updatedData = await widget.odooService.updateDiets(
+                        sessionId,
+                        selectedDiets,
+                        widget.userPhone!,
+                      );
+
+                      // Update the local state with the new diets
+                      setState(() {
+                        widget.clientData?['diets'] = selectedDiets;
+                      });
+
+                      // Refetch the available diets
+                      await _fetchAvailableDiets();
+
+                      Navigator.pop(context);
+                    } catch (e) {
+                      print('Error updating diets: $e');
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                        content: Text(
+                          'Failed to update diets.',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        backgroundColor: Colors.red,
+                      ));
+                    }
                   },
                   child: Text('Apply'),
                 ),
