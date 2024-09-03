@@ -183,6 +183,34 @@ class OdooService {
     }
   }
 
+  Future<dynamic> fetchDiets(String sessionId, String phoneNumber) async {
+    final headers = {
+      "Cookie": "session_id=$sessionId",
+      'Content-Type': 'application/json',
+    };
+
+    final data = {"client_phone": phoneNumber};
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/available_diets'),
+      headers: headers,
+      body: json.encode(data),
+    );
+
+    if (response.statusCode == 200) {
+      final dietsData = json.decode(response.body);
+      if (dietsData is List) {
+        return dietsData;
+      } else {
+        print('Fetching diets error ${response.body}');
+        return [];
+      }
+    } else {
+      throw Exception(
+          'Failed to fetch diets data, Status Code: ${response.statusCode}');
+    }
+  }
+
   Future<Map<String, dynamic>> createKitchenOrder(
       String sessionId, String identifier, String restaurant) async {
     final headers = {
@@ -211,6 +239,34 @@ class OdooService {
     } else {
       throw Exception(
           'Failed to create kitchen order, Status Code: ${orderResponse.statusCode}');
+    }
+  }
+
+  Future<Map<String, dynamic>> getOrCreateOdooClient(
+      String sessionId, String phoneNumber) async {
+    final headers = {
+      "Cookie": "session_id=$sessionId",
+      'Content-Type': 'application/json',
+    };
+
+    final data = {"client_phone": phoneNumber};
+
+    final orderResponse = await http.post(
+      Uri.parse('$baseUrl/api/get_or_create_client'),
+      headers: headers,
+      body: json.encode(data),
+    );
+
+    if (orderResponse.statusCode == 200) {
+      final clientData = json.decode(orderResponse.body);
+      if (clientData is Map<String, dynamic>) {
+        return clientData;
+      } else {
+        throw Exception("Unexpected response format: ${orderResponse.body}");
+      }
+    } else {
+      throw Exception(
+          'Failed to create client, Status Code: ${orderResponse.statusCode}');
     }
   }
 }

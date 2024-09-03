@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:food_bricks/services/odoo_service.dart';
 import 'package:food_bricks/screens/home/home.dart';
-import 'package:food_bricks/screens/plan/plan_home.dart';
 
 class constructorsHome extends StatefulWidget {
   final String? selectedRestaurant;
