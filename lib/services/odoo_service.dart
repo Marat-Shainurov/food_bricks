@@ -298,4 +298,38 @@ class OdooService {
           'Failed to create client, Status Code: ${orderResponse.statusCode}');
     }
   }
+
+  Future<Map<String, String>> updateClientField(String sessionId,
+      String phoneNumber, String fieldName, dynamic fieldValue) async {
+    final headers = {
+      "Cookie": "session_id=$sessionId",
+      'Content-Type': 'application/json',
+    };
+
+    final data = {
+      "client_phone": phoneNumber,
+      "field": fieldName,
+      "value": fieldValue
+    };
+
+    final updateResponse = await http.post(
+      Uri.parse('$baseUrl/api/update_client_field'),
+      headers: headers,
+      body: json.encode(data),
+    );
+
+    if (updateResponse.statusCode == 200) {
+      final updateData = json.decode(updateResponse.body);
+
+      // Accept any value types and convert them to strings
+      if (updateData is Map<String, dynamic>) {
+        return updateData.map((key, value) => MapEntry(key, value.toString()));
+      } else {
+        throw Exception("Unexpected response format: ${updateResponse.body}");
+      }
+    } else {
+      throw Exception(
+          'Failed to update client, Status Code: ${updateResponse.statusCode}');
+    }
+  }
 }
