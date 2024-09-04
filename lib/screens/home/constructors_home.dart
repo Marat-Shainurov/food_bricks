@@ -7,11 +7,13 @@ class constructorsHome extends StatefulWidget {
   final String? selectedRestaurant;
   final String? selectedRestaurantId;
   final Function(String, String) setSelectedRestaurant;
+  final Map<dynamic, dynamic>? clientData;
 
   const constructorsHome({
     Key? key,
     required this.selectedRestaurant,
     required this.selectedRestaurantId,
+    required this.clientData,
     required this.setSelectedRestaurant,
   }) : super(key: key);
 
@@ -32,8 +34,9 @@ class _constructorsHomeState extends State<constructorsHome> {
   @override
   void initState() {
     super.initState();
-    print('Constructors widget initialized!');
     _fetchSessionAndData();
+    print('Constructors widget initialized!');
+    print('clientData: ${widget.clientData}');
   }
 
   Future<void> _fetchOdooSession() async {
@@ -136,6 +139,7 @@ class _constructorsHomeState extends State<constructorsHome> {
                                 builder: (context) => Home(
                                     constructorId: constructor['identifier'],
                                     constructorName: constructor['name'],
+                                    clientData: widget.clientData,
                                     restaurantId: widget.selectedRestaurantId!,
                                     selectedRestaurant:
                                         widget.selectedRestaurant!),

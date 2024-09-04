@@ -6,7 +6,9 @@ import 'package:food_bricks/services/utils.dart';
 import 'package:food_bricks/screens/plan/plan_strategies.dart';
 
 class Plan extends StatefulWidget {
-  const Plan({super.key});
+  final Map<dynamic, dynamic>? clientData;
+
+  const Plan({Key? key, required this.clientData}) : super(key: key);
 
   @override
   _PlanState createState() => _PlanState();
@@ -22,18 +24,39 @@ class _PlanState extends State<Plan> {
 
   dynamic sessionId = '';
   dynamic strategies = [];
-  double caloriesLimit = 2200.0;
+  double? caloriesLimit;
   double proteins = 15.0;
   double carbs = 50.0;
   double fats = 35.0;
   PlanMacronutrientProportion? _selectedPlanProportion =
       PlanMacronutrientProportion.option1;
 
+  void _handleCaloriesChange(double value) {
+    setState(() {
+      caloriesLimit = value;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
-    print('Plan home widget initialized!');
     _fetchOdooSession();
+
+    // Check if clientData is not empty and contains "daily_calories"
+    if (widget.clientData != null &&
+        widget.clientData!["daily_calories"] != null) {
+      caloriesLimit = widget.clientData!["daily_calories"];
+    } else {
+      caloriesLimit = 2200.0;
+    }
+
+    // Set initial value for the HorizontalPicker???
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _handleCaloriesChange(caloriesLimit!);
+    });
+
+    print('Plan home widget initialized!');
+    print('clientData: ${widget.clientData}');
   }
 
   Future<void> _fetchOdooSession() async {
@@ -64,12 +87,14 @@ class _PlanState extends State<Plan> {
     // Show loader dialog
     utils.showLoaderDialog(context);
 
+    final phoneNumber = widget.clientData?['identifier'] ?? '';
     try {
       Map<String, dynamic> data = {
         "caloriesLimit": caloriesLimit.toString(),
         "proteins": proteins.toString(),
         "carbs": carbs.toString(),
         "fats": fats.toString(),
+        "client_phone": phoneNumber
       };
 
       if (sessionId == null) {

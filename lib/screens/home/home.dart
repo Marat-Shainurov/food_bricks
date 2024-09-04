@@ -10,12 +10,14 @@ class Home extends StatefulWidget {
   final String constructorName;
   final String restaurantId;
   final String selectedRestaurant;
+  final Map<dynamic, dynamic>? clientData;
 
   const Home(
       {super.key,
       required this.constructorId,
       required this.constructorName,
       required this.restaurantId,
+      required this.clientData,
       required this.selectedRestaurant});
 
   @override
@@ -41,8 +43,9 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
-    print('Home widget initialized!');
     _fetchOdooSession();
+    print('Constructor widget initialized!');
+    print('clientData: ${widget.clientData}');
   }
 
   Future<void> _fetchOdooSession() async {
@@ -73,13 +76,15 @@ class _HomeState extends State<Home> {
     // Show loader dialog
     utils.showLoaderDialog(context);
 
+    final phoneNumber = widget.clientData?['identifier'] ?? '';
     try {
       Map<String, dynamic> data = {
         "caloriesLimit": caloriesLimit.toString(),
         "proteins": proteins.toString(),
         "carbs": carbs.toString(),
         "fats": fats.toString(),
-        "constructor_id": widget.constructorId
+        "constructor_id": widget.constructorId,
+        "client_phone": phoneNumber
       };
 
       if (sessionId == null) {

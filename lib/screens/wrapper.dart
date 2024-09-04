@@ -47,10 +47,11 @@ class _WrapperState extends State<Wrapper> {
 
   // List of widgets to display for each tab
   List<Widget> _widgetOptions(BuildContext context) => <Widget>[
-        const Plan(), // Planner widget
+        Plan(clientData: clientData), // Planner widget
         constructorsHome(
           selectedRestaurant: selectedRestaurant,
           selectedRestaurantId: selectedRestaurantId,
+          clientData: clientData,
           setSelectedRestaurant: (restaurant, restaurantId) {
             setState(() {
               selectedRestaurant = restaurant;
