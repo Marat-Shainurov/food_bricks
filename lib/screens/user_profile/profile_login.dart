@@ -121,6 +121,8 @@ class _UserProfileState extends State<UserProfile> {
     if (widget.userPhone != null) {
       _phoneController.text = widget.userPhone!;
     }
+    print('User profile widget initialized!');
+    print('clientData: ${widget.clientData}');
   }
 
   void _showDietPopup(BuildContext context) async {
@@ -203,6 +205,15 @@ class _UserProfileState extends State<UserProfile> {
                       // Refetch the available diets
                       await _fetchAvailableDiets();
 
+                      // Show success message
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                              'Your Diets list has been updated successfully!'),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+
                       Navigator.pop(context);
                     } catch (e) {
                       print('Error updating diets: $e');
@@ -235,6 +246,9 @@ class _UserProfileState extends State<UserProfile> {
   }
 
   void _showCaloriesPopup(BuildContext context) {
+    final initialCalories = widget.clientData?['daily_calories'] ?? '';
+    _caloriesController.text = '${initialCalories}';
+
     showDialog(
       context: context,
       builder: (context) {
@@ -256,8 +270,45 @@ class _UserProfileState extends State<UserProfile> {
               child: Text('Cancel'),
             ),
             ElevatedButton(
-              onPressed: () {
-                // TODO: Implement the Apply logic here
+              onPressed: () async {
+                // Fetch the new daily calories value from the input
+                final newCalories = _caloriesController.text;
+
+                // Check if the value has changed
+                if (newCalories.isNotEmpty && newCalories != initialCalories) {
+                  try {
+                    // Call the updateClientField method to update the value on the backend
+                    await widget.odooService.updateClientField(
+                      sessionId,
+                      widget.userPhone!,
+                      'daily_calories',
+                      newCalories,
+                    );
+
+                    // Update the local clientData with the new value
+                    setState(() {
+                      widget.clientData?['daily_calories'] = newCalories;
+                    });
+
+                    // Show success message
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                            'Daily Calories setting has been updated successfully!'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  } catch (e) {
+                    // Handle the error, show error message
+                    print('Error updating daily calories: $e');
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Failed to update daily calories.'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
                 Navigator.pop(context);
               },
               child: Text('Apply'),
@@ -273,13 +324,16 @@ class _UserProfileState extends State<UserProfile> {
   }
 
   void _showMealsPerDayPopup(BuildContext context) {
+    final initialMealsPerDay = widget.clientData?['meals_per_day'] ?? '';
+    _mealsPerDayController.text = '${initialMealsPerDay}';
+
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
           title: const Text('Edit Meals Per Day'),
           content: TextFormField(
-            controller: _caloriesController,
+            controller: _mealsPerDayController,
             decoration: const InputDecoration(
               border: OutlineInputBorder(),
               hintText: 'Enter meals per day',
@@ -294,8 +348,46 @@ class _UserProfileState extends State<UserProfile> {
               child: Text('Cancel'),
             ),
             ElevatedButton(
-              onPressed: () {
-                // TODO: Implement the Apply logic here
+              onPressed: () async {
+                // Fetch the new mealsPerDay value from the input
+                final newMealsPerDay = _mealsPerDayController.text;
+
+                // Check if the value has changed
+                if (newMealsPerDay.isNotEmpty &&
+                    newMealsPerDay != initialMealsPerDay) {
+                  try {
+                    // Call the updateClientField method to update the value on the backend
+                    await widget.odooService.updateClientField(
+                      sessionId,
+                      widget.userPhone!,
+                      'meals_per_day',
+                      newMealsPerDay,
+                    );
+
+                    // Update the local clientData with the new value
+                    setState(() {
+                      widget.clientData?['meals_per_day'] = newMealsPerDay;
+                    });
+
+                    // Show success message
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                            'Meals Per Day setting has been updated successfully!'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  } catch (e) {
+                    // Handle the error, show error message
+                    print('Error updating Meals Per Day: $e');
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Failed to update Meals per day.'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
                 Navigator.pop(context);
               },
               child: Text('Apply'),
@@ -311,8 +403,10 @@ class _UserProfileState extends State<UserProfile> {
   }
 
   void _showSnacksDessertsPopup(BuildContext context) {
-    bool snacksSelected = widget.clientData?['eatsSnacks'] ?? false;
-    bool dessertsSelected = widget.clientData?['eatsDesserts'] ?? false;
+    final initialSnacks = widget.clientData?['eats_snacks'] ?? false;
+    final initialDesserts = widget.clientData?['eats_desserts'] ?? false;
+    bool snacksSelected = widget.clientData?['eats_snacks'];
+    bool dessertsSelected = widget.clientData?['eats_desserts'];
 
     showDialog(
       context: context,
@@ -348,12 +442,53 @@ class _UserProfileState extends State<UserProfile> {
           ),
           actions: [
             TextButton(
-              onPressed: () {
-                // Save the selections
-                setState(() {
-                  widget.clientData!['eatsSnacks'] = snacksSelected;
-                  widget.clientData!['eatsDesserts'] = dessertsSelected;
-                });
+              onPressed: () async {
+                // Applpy the selections
+                bool newSnacksSelected = snacksSelected;
+                bool newDessertsSelected = dessertsSelected;
+
+                try {
+                  if (newSnacksSelected != initialSnacks) {
+                    await widget.odooService.updateClientField(
+                      sessionId,
+                      widget.userPhone!,
+                      'eats_snacks',
+                      newSnacksSelected,
+                    );
+                    setState(() {
+                      widget.clientData!['eats_snacks'] = snacksSelected;
+                    });
+                  }
+
+                  if (newDessertsSelected != initialDesserts) {
+                    await widget.odooService.updateClientField(
+                      sessionId,
+                      widget.userPhone!,
+                      'eats_desserts',
+                      newDessertsSelected,
+                    );
+                    setState(() {
+                      widget.clientData!['eats_desserts'] = dessertsSelected;
+                    });
+                  }
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                          'Snacks and Desserts setting has been updated successfully!'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                } catch (e) {
+                  print('Error updating Snacks and Desserts: $e');
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                          'Failed to update Snacks and Desserts settings.'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
                 Navigator.of(context).pop();
               },
               child: const Text("Apply"),
@@ -377,7 +512,7 @@ class _UserProfileState extends State<UserProfile> {
       appBar: AppBar(
         title: Text(
           widget.userPhone != null
-              ? 'Welcome, ${widget.userPhone}'
+              ? 'Welcome, ${clientName ?? widget.userPhone}'
               : 'User Profile',
           style:
               const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
