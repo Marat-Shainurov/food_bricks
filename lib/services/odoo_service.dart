@@ -240,8 +240,8 @@ class OdooService {
     }
   }
 
-  Future<Map<String, dynamic>> createKitchenOrder(
-      String sessionId, String identifier, String restaurant) async {
+  Future<Map<String, dynamic>> createKitchenOrder(String sessionId,
+      String identifier, String restaurant, dynamic phoneNumber) async {
     final headers = {
       "Cookie": "session_id=$sessionId",
       'Content-Type': 'application/json',
@@ -249,7 +249,8 @@ class OdooService {
 
     final data = {
       "identifier": identifier,
-      "restaurant_identifier": restaurant
+      "restaurant_identifier": restaurant,
+      "client_phone": phoneNumber
     };
 
     final orderResponse = await http.post(

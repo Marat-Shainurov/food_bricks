@@ -4,6 +4,7 @@ import 'package:food_bricks/services/odoo_service.dart';
 import 'package:food_bricks/screens/solutions/order_confirmation.dart';
 
 class SolutionDetail extends StatefulWidget {
+  final Map clientData;
   final dynamic solution;
   final OdooService odooService;
   final String constructorId;
@@ -16,6 +17,7 @@ class SolutionDetail extends StatefulWidget {
       required this.odooService,
       required this.constructorId,
       required this.restaurantId,
+      required this.clientData,
       required this.selectedRestaurant})
       : super(key: key);
 
@@ -51,8 +53,10 @@ class _SolutionDetailState extends State<SolutionDetail> {
     try {
       final identifier = widget.solution['identifier'] as String;
       final restaurant = widget.restaurantId;
+      final clientData = widget.clientData;
+      final phoneNumber = widget.clientData?['identifier'] ?? '';
       final response = await widget.odooService
-          .createKitchenOrder(sessionId, identifier, restaurant);
+          .createKitchenOrder(sessionId, identifier, restaurant, phoneNumber);
 
       if (response != null) {
         print('Order created with ID: ${response['order_identifier']}');
@@ -62,11 +66,11 @@ class _SolutionDetailState extends State<SolutionDetail> {
           context,
           MaterialPageRoute(
             builder: (context) => OrderConfirmation(
-              response: response,
-              solution: widget.solution,
-              restaurantId: widget.restaurantId,
-              selectedRestaurant: widget.selectedRestaurant,
-            ),
+                response: response,
+                solution: widget.solution,
+                restaurantId: widget.restaurantId,
+                selectedRestaurant: widget.selectedRestaurant,
+                clientData: clientData),
           ),
         );
       } else {
