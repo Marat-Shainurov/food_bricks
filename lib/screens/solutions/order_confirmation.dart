@@ -7,11 +7,13 @@ class OrderConfirmation extends StatelessWidget {
   final dynamic solution;
   final String restaurantId;
   final String selectedRestaurant;
+  final Map clientData;
 
   const OrderConfirmation(
       {Key? key,
       required this.response,
       required this.solution,
+      required this.clientData,
       required this.restaurantId,
       required this.selectedRestaurant})
       : super(key: key);
@@ -81,6 +83,7 @@ class OrderConfirmation extends StatelessWidget {
                           selectedRestaurant, // Pass the restaurant name back
                       selectedRestaurantId:
                           restaurantId, // Pass the restaurantId back
+                      clientData: clientData,
                     ),
                   ),
                   (Route<dynamic> route) => false,

@@ -109,6 +109,7 @@ class _HomeState extends State<Home> {
               constructorId: widget.constructorId,
               restaurantId: widget.restaurantId,
               selectedRestaurant: widget.selectedRestaurant,
+              clientData: widget.clientData,
             ),
           ),
         );
