@@ -1,7 +1,7 @@
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:food_bricks/services/odoo_service.dart';
-import 'package:food_bricks/screens/plan/plan_home.dart';
+import 'package:food_bricks/screens/plan/ration_order.dart';
 
 class StrategyRationsGrid extends StatefulWidget {
   final List<dynamic> strategyRations;
@@ -41,35 +41,50 @@ class _StrategyRationsGridState extends State<StrategyRationsGrid> {
             childAspectRatio: 0.75,
           ),
           itemCount: widget.strategyRations.length,
+          // Update this method in strategy_ration.dart
+
           itemBuilder: (context, index) {
             final ration = widget.strategyRations[index];
-            return Card(
-              elevation: 4.0,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Expanded(
-                    child: Image.network(
-                      ration['image_serving_weight'],
-                      fit: BoxFit.fitWidth,
+            return GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => RationOrder(
+                      ration: ration, // Pass the ration data
+                      odooService: widget.odooService,
                     ),
                   ),
-                  Container(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          '${formatter.format(ration['price'].toInt())} VND',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12.0,
+                );
+              },
+              child: Card(
+                elevation: 4.0,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                      child: Image.network(
+                        ration['image_serving_weight'],
+                        fit: BoxFit.fitWidth,
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            '${formatter.format(ration['price'].toInt())} VND',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12.0,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             );
           },
