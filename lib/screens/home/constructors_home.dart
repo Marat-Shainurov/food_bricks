@@ -62,6 +62,20 @@ class _constructorsHomeState extends State<constructorsHome> {
         constructors = fetchedConstructors;
         restaurants = fetchedRestaurants;
         isLoading = false;
+
+        // Set the first restaurant as default if none is selected
+        if (widget.selectedRestaurant == null ||
+            widget.selectedRestaurant!.isEmpty) {
+          final firstRestaurant =
+              fetchedRestaurants.isNotEmpty ? fetchedRestaurants.first : null;
+          if (firstRestaurant != null) {
+            final selectedRestaurant = firstRestaurant['name'];
+            final selectedRestaurantId = firstRestaurant['identifier'];
+
+            widget.setSelectedRestaurant(
+                selectedRestaurant, selectedRestaurantId);
+          }
+        }
       });
       print('Fetched constructors: $constructors');
       print('-----------------------------------');
