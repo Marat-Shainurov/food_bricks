@@ -3,6 +3,8 @@ import 'package:food_bricks/screens/plan/plan_home.dart';
 import 'package:food_bricks/screens/home/constructors_home.dart';
 import 'package:food_bricks/screens/user_profile/profile_login.dart';
 import 'package:food_bricks/services/odoo_service.dart';
+import 'package:food_bricks/services/auth_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class Wrapper extends StatefulWidget {
   final String? selectedRestaurant;
@@ -29,6 +31,7 @@ class _WrapperState extends State<Wrapper> {
   String? selectedRestaurantId;
   String? userPhone;
   Map? clientData;
+  dynamic sessionId = '';
 
   final OdooService odooService = OdooService('https://evo.migom.cloud');
   // final OdooService odooService = OdooService('http://192.168.100.38:8069');
@@ -37,12 +40,37 @@ class _WrapperState extends State<Wrapper> {
   @override
   void initState() {
     super.initState();
+    _checkUserLogin();
 
-    // Initialize state from widget if data is passed in
     selectedRestaurant = widget.selectedRestaurant;
     selectedRestaurantId = widget.selectedRestaurantId;
     userPhone = widget.userPhone;
     clientData = widget.clientData ?? {};
+  }
+
+  Future<void> _checkUserLogin() async {
+    final user = FirebaseAuth.instance.currentUser; // Check current user
+    print(
+        'FirebaseAuth.instance.currentUser: ${FirebaseAuth.instance.currentUser}');
+    if (user != null) {
+      sessionId = await odooService.fetchSessionId();
+      if (user.phoneNumber != null) {
+        // Use setState to update userPhone and clientData
+        setState(() {
+          userPhone = user.phoneNumber; // Update userPhone
+        });
+        clientData = await odooService.getOrCreateOdooClient(
+            sessionId, userPhone!); // Update clientData
+        setState(() {
+          clientData = clientData;
+        });
+        print('user.phoneNumber: ${user.phoneNumber}');
+        print('userPhone: $userPhone');
+        print('clientData: $clientData');
+      } else {
+        print('No phone number found for the current user.');
+      }
+    }
   }
 
   // List of widgets to display for each tab
@@ -60,6 +88,8 @@ class _WrapperState extends State<Wrapper> {
           },
         ),
         UserProfile(
+          selectedRestaurant: selectedRestaurant,
+          selectedRestaurantId: selectedRestaurantId,
           userPhone: userPhone,
           clientData: clientData,
           odooService: odooService,
