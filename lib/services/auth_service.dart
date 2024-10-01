@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
   static final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
@@ -34,13 +35,17 @@ class AuthService {
   }
 
   // verify the otp code and login
-  static Future loginWithOtp({required String otp}) async {
+  static Future loginWithOtp(
+      {required String otp, required String phone}) async {
     final cred =
         PhoneAuthProvider.credential(verificationId: verifyId, smsCode: otp);
 
     try {
       final user = await _firebaseAuth.signInWithCredential(cred);
       if (user.user != null) {
+        // final prefs = await SharedPreferences.getInstance();
+        // await prefs.setInt('lastLogin', DateTime.now().millisecondsSinceEpoch);
+        // await prefs.setString('userPhone', phone); // Store the phone number
         return "Success";
       } else {
         return "Error in Otp login";
@@ -54,11 +59,24 @@ class AuthService {
 
   // to logout the user
   static Future logout() async {
+    // Clear SharedPreferences
+    // final prefs = await SharedPreferences.getInstance();
+    // await prefs.remove('lastLogin');
+    // await prefs.remove('userPhone');
     await _firebaseAuth.signOut();
   }
 
   // check whether the user is logged in or not
   static Future<bool> isLoggedIn() async {
+    // final prefs = await SharedPreferences.getInstance();
+    // final lastLogin = prefs.getInt('lastLogin');
+    // final userPhone =
+    //     prefs.getString('userPhone'); // Get the stored phone number
+    // if (lastLogin == null || userPhone == null) return false;
+    // final oneYearAgo =
+    //     DateTime.now().subtract(Duration(days: 365)).millisecondsSinceEpoch;
+    // return lastLogin >= oneYearAgo; // Check if the last login was within a year
+
     var user = _firebaseAuth.currentUser;
     return user != null;
   }

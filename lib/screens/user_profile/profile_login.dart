@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:food_bricks/services/auth_service.dart';
 import 'package:telephony/telephony.dart';
 import 'package:food_bricks/services/odoo_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:food_bricks/screens/wrapper.dart';
 
 class UserProfile extends StatefulWidget {
+  final String? selectedRestaurant;
+  final String? selectedRestaurantId;
   final String? userPhone;
   final Function(String) setUserPhone;
   final Function(Map) setClientData;
@@ -13,6 +17,8 @@ class UserProfile extends StatefulWidget {
   const UserProfile(
       {Key? key,
       this.userPhone,
+      this.selectedRestaurant,
+      this.selectedRestaurantId,
       required this.setUserPhone,
       required this.setClientData,
       this.clientData,
@@ -37,6 +43,22 @@ class _UserProfileState extends State<UserProfile> {
   dynamic sessionId = '';
   Map clientDataOdoo = {};
   List<dynamic> availableDiets = [];
+
+  Future<void> _logout() async {
+    await AuthService.logout();
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => Wrapper(
+          selectedRestaurant: widget.selectedRestaurant,
+          selectedRestaurantId: widget.selectedRestaurantId,
+          userPhone: null, // Clear userPhone
+          clientData: {}, // Clear client data
+        ),
+      ),
+    );
+  }
 
   void listenToIncomingSMS(BuildContext context) {
     print("Listening to sms.");
@@ -63,11 +85,14 @@ class _UserProfileState extends State<UserProfile> {
   // handle after otp is submitted
   void handleSubmit(BuildContext context) {
     if (_formKey1.currentState!.validate()) {
-      AuthService.loginWithOtp(otp: _otpController.text).then((value) {
+      AuthService.loginWithOtp(
+              otp: _otpController.text, phone: _phoneController.text)
+          .then((value) {
         if (value == "Success") {
-          widget.setUserPhone(_phoneController.text);
+          setState(() {
+            widget.setUserPhone(_phoneController.text);
+          });
           _fetchAndSetOdooClient();
-          print(widget.clientData);
           Navigator.pop(context);
         } else {
           Navigator.pop(context);
@@ -117,6 +142,7 @@ class _UserProfileState extends State<UserProfile> {
   void initState() {
     super.initState();
     _fetchOdooSession();
+    // _checkClientData();
     _fetchAvailableDiets();
     if (widget.userPhone != null) {
       _phoneController.text = widget.userPhone!;
@@ -124,6 +150,19 @@ class _UserProfileState extends State<UserProfile> {
     print('User profile widget initialized!');
     print('clientData: ${widget.clientData}');
   }
+
+  // Future<void> _checkClientData() async {
+  //   final prefs = await SharedPreferences.getInstance();
+  //   final lastLogin = prefs.getInt('lastLogin');
+  //   final userPhone = prefs.getString('userPhone');
+
+  //   if (lastLogin != null && userPhone != null) {
+  //     // Set the phone number in the controller and fetch client data
+  //     _phoneController.text = userPhone;
+  //     widget.setUserPhone(_phoneController.text);
+  //     await _fetchAndSetOdooClient();
+  //   }
+  // }
 
   void _showDietPopup(BuildContext context) async {
     if (availableDiets.isEmpty) {
@@ -508,6 +547,9 @@ class _UserProfileState extends State<UserProfile> {
     final eatsSnacks = widget.clientData?['eats_snacks'] ?? null;
     final eatsDesserts = widget.clientData?['eats_desserts'] ?? null;
 
+    print('userPhone: ----- ${widget.userPhone}');
+    print('clientData: ----- ${widget.clientData}');
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -519,11 +561,20 @@ class _UserProfileState extends State<UserProfile> {
         ),
         backgroundColor: Colors.blue[500],
         centerTitle: true,
+        actions: [
+          // Conditionally show the logout button
+          if (widget.userPhone != null)
+            IconButton(
+              icon: Icon(Icons.logout),
+              onPressed: _logout, // Call the logout method
+              tooltip: 'Logout',
+            ),
+        ],
       ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: widget.userPhone == null
+          child: widget.userPhone == null || widget.userPhone == ''
               ? Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
