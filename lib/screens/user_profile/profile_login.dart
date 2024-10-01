@@ -684,7 +684,7 @@ class _UserProfileState extends State<UserProfile> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const Text(
-                              'Dietary Preferences',
+                              'Diets',
                               style: TextStyle(
                                   fontSize: 16.0, fontWeight: FontWeight.bold),
                             ),

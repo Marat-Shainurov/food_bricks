@@ -42,15 +42,17 @@ class _PlanState extends State<Plan> {
     super.initState();
     _fetchOdooSession();
 
-    // Check if clientData is not empty and contains "daily_calories"
+    // Ensure the value is parsed as double if it comes as a String
     if (widget.clientData != null &&
         widget.clientData!["daily_calories"] != null) {
-      caloriesLimit = widget.clientData!["daily_calories"];
+      caloriesLimit =
+          double.tryParse(widget.clientData!["daily_calories"].toString()) ??
+              2200.0;
     } else {
       caloriesLimit = 2200.0;
     }
 
-    // Set initial value for the HorizontalPicker???
+    // Set initial value for the HorizontalPicker
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _handleCaloriesChange(caloriesLimit!);
     });
@@ -129,54 +131,96 @@ class _PlanState extends State<Plan> {
     }
   }
 
+  Widget _buildInfoCard(String title, dynamic value) {
+    return Card(
+      elevation: 4,
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              title,
+              style:
+                  const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            Text(
+              value.toString(),
+              style: const TextStyle(fontSize: 16.0),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final diets = widget.clientData?['diets'] ?? [];
+    final dailyCalories = caloriesLimit;
+    final mealsPerDay =
+        widget.clientData?['meals_per_day']?.toString() ?? 'Not set yet';
+    final eatsSnacks = widget.clientData?['eats_snacks'] != null
+        ? (widget.clientData!['eats_snacks'] ? 'Yes' : 'No')
+        : 'Not set yet';
+    final eatsDesserts = widget.clientData?['eats_desserts'] != null
+        ? (widget.clientData!['eats_desserts'] ? 'Yes' : 'No')
+        : 'Not set yet';
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Recipe Plan',
+          'Daily Plan',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.blue[500],
         centerTitle: true,
-        // actions: [],
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              Expanded(
+        child: Column(
+          children: <Widget>[
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16.0),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
                     const Text(
                       'Select Your Calories Limit',
                       style: TextStyle(
                           fontSize: 18.0, fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 20),
-                    HorizontalPicker(
-                      minValue: 1200,
-                      maxValue: 3200,
-                      divisions: (3200 - 1200) ~/ 100,
-                      height: 120,
-                      suffix: " kcal",
-                      showCursor: true,
-                      backgroundColor: Colors.grey.shade200,
-                      activeItemTextColor: Colors.blue.shade800,
-                      passiveItemsTextColor: Colors.grey.shade500,
-                      onChanged: (value) {
-                        setState(() {
-                          caloriesLimit = value;
-                        });
-                      },
+
+                    // Horizontal Picker centered
+                    Center(
+                      child: HorizontalPicker(
+                        minValue: 1200,
+                        maxValue: 3200,
+                        divisions: (3200 - 1200) ~/ 100,
+                        height: 120,
+                        suffix: " kcal",
+                        showCursor: true,
+                        backgroundColor: Colors.grey.shade200,
+                        activeItemTextColor: Colors.blue.shade800,
+                        passiveItemsTextColor: Colors.grey.shade500,
+                        onChanged: (value) {
+                          setState(() {
+                            caloriesLimit = value;
+                          });
+                        },
+                      ),
                     ),
                     const SizedBox(height: 20),
+
                     const Text(
                       'Nutrients Proportion',
                       style: TextStyle(
                           fontSize: 18.0, fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 20),
                     Row(
@@ -209,27 +253,49 @@ class _PlanState extends State<Plan> {
                         ),
                       ],
                     ),
+                    const SizedBox(height: 20),
+                    const Text(
+                      'User preferences',
+                      style: TextStyle(
+                          fontSize: 18.0, fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 20),
+
+                    // User Info Cards centered and stretched
+                    _buildInfoCard(
+                      'Diets',
+                      diets.isEmpty ? 'Not set yet' : diets.join(', '),
+                    ),
+                    const SizedBox(height: 20),
+                    _buildInfoCard('Daily Calories Intake', dailyCalories),
+                    const SizedBox(height: 20),
+                    _buildInfoCard('Meals Per Day', mealsPerDay),
+                    const SizedBox(height: 20),
+                    _buildInfoCard('Eats Snacks', eatsSnacks),
+                    const SizedBox(height: 20),
+                    _buildInfoCard('Eats Desserts', eatsDesserts),
                   ],
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: ElevatedButton(
-                  onPressed: _onNextPressed,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue[500],
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 24.0, vertical: 12.0),
-                  ),
-                  child: const Text('Next',
-                      style: TextStyle(
-                          fontSize: 16.0,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white)),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: ElevatedButton(
+                onPressed: _onNextPressed,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue[500],
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 24.0, vertical: 12.0),
                 ),
+                child: const Text('Next',
+                    style: TextStyle(
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white)),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
