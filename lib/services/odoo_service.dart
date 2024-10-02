@@ -211,14 +211,47 @@ class OdooService {
     }
   }
 
-  Future<dynamic> updateDiets(
-      String sessionId, List selectedDiets, String phoneNumber) async {
+  Future<dynamic> fetchIngredientsStoppers(
+      String sessionId, String phoneNumber) async {
     final headers = {
       "Cookie": "session_id=$sessionId",
       'Content-Type': 'application/json',
     };
 
-    final data = {"selected_diets": selectedDiets, "client_phone": phoneNumber};
+    final data = {"client_phone": phoneNumber};
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/available_ingredients_stoppers'),
+      headers: headers,
+      body: json.encode(data),
+    );
+
+    if (response.statusCode == 200) {
+      final ingredientsData = json.decode(response.body);
+      if (ingredientsData is List) {
+        return ingredientsData;
+      } else {
+        print('Fetching ingredients-stoppers error ${response.body}');
+        return [];
+      }
+    } else {
+      throw Exception(
+          'Failed to fetch ingredients-stoppers data, Status Code: ${response.statusCode}');
+    }
+  }
+
+  Future<dynamic> updateDiets(String sessionId, List selectedItems,
+      String phoneNumber, String updType) async {
+    final headers = {
+      "Cookie": "session_id=$sessionId",
+      'Content-Type': 'application/json',
+    };
+
+    final data = {
+      "selected_items": selectedItems,
+      "client_phone": phoneNumber,
+      "update_type": updType
+    };
 
     final response = await http.post(
       Uri.parse('$baseUrl/api/client/update_client_diets'),
