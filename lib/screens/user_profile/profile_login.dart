@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:food_bricks/services/auth_service.dart';
 import 'package:telephony/telephony.dart';
 import 'package:food_bricks/services/odoo_service.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:food_bricks/screens/wrapper.dart';
 
 class UserProfile extends StatefulWidget {
@@ -43,6 +42,7 @@ class _UserProfileState extends State<UserProfile> {
   dynamic sessionId = '';
   Map clientDataOdoo = {};
   List<dynamic> availableDiets = [];
+  List<dynamic> availableIngredients = [];
 
   Future<void> _logout() async {
     await AuthService.logout();
@@ -138,12 +138,23 @@ class _UserProfileState extends State<UserProfile> {
     }
   }
 
+  Future<void> _fetchAvailableIngredients() async {
+    try {
+      availableDiets = await widget.odooService
+          .fetchIngredientsStoppers(sessionId, _phoneController.text);
+      setState(() {});
+    } catch (e) {
+      print('Error fetching available ingredients: $e');
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     _fetchOdooSession();
     // _checkClientData();
     _fetchAvailableDiets();
+    _fetchAvailableIngredients();
     if (widget.userPhone != null) {
       _phoneController.text = widget.userPhone!;
     }
@@ -178,12 +189,12 @@ class _UserProfileState extends State<UserProfile> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: Text('Edit Dietary Preferences'),
+              title: const Text('Edit Diets'),
               content: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Current Diets:'),
+                    const Text('Current Diets:'),
                     ...currentDiets.map((diet) {
                       return CheckboxListTile(
                         title: Text(diet),
@@ -199,8 +210,8 @@ class _UserProfileState extends State<UserProfile> {
                         },
                       );
                     }).toList(),
-                    SizedBox(height: 20),
-                    Text('Available Diets:'),
+                    const SizedBox(height: 20),
+                    const Text('Available Diets:'),
                     ...availableDiets.map((diet) {
                       return CheckboxListTile(
                         title: Text(diet),
@@ -231,10 +242,7 @@ class _UserProfileState extends State<UserProfile> {
                     // Send the newly selected diets to Odoo
                     try {
                       final updatedData = await widget.odooService.updateDiets(
-                        sessionId,
-                        selectedDiets,
-                        widget.userPhone!,
-                      );
+                          sessionId, selectedDiets, widget.userPhone!, "diets");
 
                       // Update the local state with the new diets
                       setState(() {
@@ -279,6 +287,126 @@ class _UserProfileState extends State<UserProfile> {
           // Send the updated diets back to the server here if needed.
           print('currentDiets - ${currentDiets}');
           print('selectedDiets - ${selectedDiets}');
+        });
+      }
+    });
+  }
+
+  void _showDontEatPopup(BuildContext context) async {
+    if (availableDiets.isEmpty) {
+      await _fetchAvailableIngredients();
+    }
+
+    final currentStoppers = widget.clientData?['do_not_eat'] ?? [];
+    final selectedStoppers = List<String>.from(currentStoppers);
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('Edit Ingredients stoppers'),
+              content: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text("Currently Don't eat:"),
+                    ...currentStoppers.map((diet) {
+                      return CheckboxListTile(
+                        title: Text(diet),
+                        value: selectedStoppers.contains(diet),
+                        onChanged: (bool? value) {
+                          setState(() {
+                            if (value == true) {
+                              selectedStoppers.add(diet);
+                            } else {
+                              selectedStoppers.remove(diet);
+                            }
+                          });
+                        },
+                      );
+                    }).toList(),
+                    const SizedBox(height: 20),
+                    const Text('Available ingredients:'),
+                    ...availableIngredients.map((diet) {
+                      return CheckboxListTile(
+                        title: Text(diet),
+                        value: selectedStoppers.contains(diet),
+                        onChanged: (bool? value) {
+                          setState(() {
+                            if (value == true) {
+                              selectedStoppers.add(diet);
+                            } else {
+                              selectedStoppers.remove(diet);
+                            }
+                          });
+                        },
+                      );
+                    }).toList(),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    // Send the newly selected diets to Odoo
+                    try {
+                      final updatedData = await widget.odooService.updateDiets(
+                          sessionId,
+                          selectedStoppers,
+                          widget.userPhone!,
+                          'stoppers');
+
+                      // Update the local state with the new diets
+                      setState(() {
+                        widget.clientData?['do_not_eat'] = selectedStoppers;
+                      });
+
+                      // Refetch the available diets
+                      await _fetchAvailableIngredients();
+
+                      // Show success message
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                              'Ingredients that you do not eat have been updated successfully!'),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+
+                      Navigator.pop(context);
+                    } catch (e) {
+                      print('Error updating ingredients: $e');
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                        content: Text(
+                          'Failed to update ingredients.',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        backgroundColor: Colors.red,
+                      ));
+                    }
+                  },
+                  child: Text('Apply'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    ).then((selectedStoppers) {
+      if (selectedStoppers != null) {
+        setState(() {
+          widget.clientData?['do_not_eat'] = selectedStoppers.toList();
+          // Send the updated diets back to the server here if needed.
+          print('currentStoppers - ${currentStoppers}');
+          print('selectedStoppers - ${selectedStoppers}');
         });
       }
     });
@@ -542,6 +670,7 @@ class _UserProfileState extends State<UserProfile> {
   Widget build(BuildContext context) {
     final clientName = widget.clientData?['name'] ?? 'User';
     final diets = widget.clientData?['diets'] ?? [];
+    final stoppers = widget.clientData?['do_not_eat'] ?? [];
     final dailyCalories = widget.clientData?['daily_calories'] ?? 'Not set yet';
     final mealsPerDay = widget.clientData?['meals_per_day'] ?? 'Not set yet';
     final eatsSnacks = widget.clientData?['eats_snacks'] ?? null;
@@ -712,6 +841,52 @@ class _UserProfileState extends State<UserProfile> {
                                         child: ElevatedButton(
                                           onPressed: () =>
                                               _showDietPopup(context),
+                                          child: const Text('Edit'),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Card(
+                      elevation: 4,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              "Don't eat",
+                              style: TextStyle(
+                                  fontSize: 16.0, fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 30),
+                            diets.isEmpty
+                                ? ElevatedButton(
+                                    onPressed: () => _showDontEatPopup(context),
+                                    child: const Text('Add'),
+                                  )
+                                : Column(
+                                    children: [
+                                      ConstrainedBox(
+                                        constraints:
+                                            BoxConstraints(maxHeight: 200),
+                                        child: ListView.builder(
+                                          shrinkWrap: true,
+                                          itemCount: stoppers.length,
+                                          itemBuilder: (context, index) {
+                                            return Text('- ${stoppers[index]}');
+                                          },
+                                        ),
+                                      ),
+                                      Align(
+                                        alignment: Alignment.bottomRight,
+                                        child: ElevatedButton(
+                                          onPressed: () =>
+                                              _showDontEatPopup(context),
                                           child: const Text('Edit'),
                                         ),
                                       ),
