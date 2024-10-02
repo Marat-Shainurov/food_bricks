@@ -7,8 +7,15 @@ import 'package:food_bricks/screens/plan/plan_strategies.dart';
 
 class Plan extends StatefulWidget {
   final Map<dynamic, dynamic>? clientData;
+  final String? selectedRestaurant;
+  final String? selectedRestaurantId;
 
-  const Plan({Key? key, required this.clientData}) : super(key: key);
+  const Plan(
+      {Key? key,
+      required this.clientData,
+      required this.selectedRestaurant,
+      required this.selectedRestaurantId})
+      : super(key: key);
 
   @override
   _PlanState createState() => _PlanState();
@@ -116,9 +123,11 @@ class _PlanState extends State<Plan> {
           context,
           MaterialPageRoute(
             builder: (context) => StrategiesGrid(
-              strategies: fetchedStrategies,
-              odooService: odooService,
-            ),
+                strategies: fetchedStrategies,
+                odooService: odooService,
+                selectedRestaurant: widget.selectedRestaurant,
+                selectedRestaurantId: widget.selectedRestaurantId,
+                clientData: widget.clientData),
           ),
         );
       } else {

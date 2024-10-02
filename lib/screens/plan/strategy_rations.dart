@@ -7,12 +7,18 @@ class StrategyRationsGrid extends StatefulWidget {
   final List<dynamic> strategyRations;
   final String strategyId;
   final OdooService odooService;
+  final Map<dynamic, dynamic>? clientData;
+  final String? selectedRestaurant;
+  final String? selectedRestaurantId;
 
   const StrategyRationsGrid(
       {Key? key,
       required this.strategyRations,
       required this.odooService,
-      required this.strategyId})
+      required this.strategyId,
+      required this.clientData,
+      required this.selectedRestaurant,
+      required this.selectedRestaurantId})
       : super(key: key);
 
   @override
@@ -51,8 +57,11 @@ class _StrategyRationsGridState extends State<StrategyRationsGrid> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => RationOrder(
-                      ration: ration, // Pass the ration data
+                      ration: ration,
                       odooService: widget.odooService,
+                      clientData: widget.clientData,
+                      selectedRestaurant: widget.selectedRestaurant,
+                      selectedRestaurantId: widget.selectedRestaurantId,
                     ),
                   ),
                 );

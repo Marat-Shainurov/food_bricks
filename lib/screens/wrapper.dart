@@ -75,7 +75,10 @@ class _WrapperState extends State<Wrapper> {
 
   // List of widgets to display for each tab
   List<Widget> _widgetOptions(BuildContext context) => <Widget>[
-        Plan(clientData: clientData), // Planner widget
+        Plan(
+            clientData: clientData,
+            selectedRestaurant: selectedRestaurant,
+            selectedRestaurantId: selectedRestaurantId),
         constructorsHome(
           selectedRestaurant: selectedRestaurant,
           selectedRestaurantId: selectedRestaurantId,

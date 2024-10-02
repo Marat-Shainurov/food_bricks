@@ -7,9 +7,17 @@ import 'package:food_bricks/services/utils.dart';
 class StrategiesGrid extends StatefulWidget {
   final List<dynamic> strategies;
   final OdooService odooService;
+  final String? selectedRestaurant;
+  final String? selectedRestaurantId;
+  final Map<dynamic, dynamic>? clientData;
 
   const StrategiesGrid(
-      {Key? key, required this.strategies, required this.odooService})
+      {Key? key,
+      required this.clientData,
+      required this.strategies,
+      required this.odooService,
+      required this.selectedRestaurant,
+      required this.selectedRestaurantId})
       : super(key: key);
 
   @override
@@ -42,6 +50,9 @@ class _StrategiesGridState extends State<StrategiesGrid> {
             strategyRations: strategyRations,
             strategyId: strategyId,
             odooService: widget.odooService,
+            clientData: widget.clientData,
+            selectedRestaurant: widget.selectedRestaurant,
+            selectedRestaurantId: widget.selectedRestaurantId,
           ),
         ),
       );
