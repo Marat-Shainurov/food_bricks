@@ -38,6 +38,7 @@ class _UserProfileState extends State<UserProfile> {
 
   final _formKey = GlobalKey<FormState>();
   final _formKey1 = GlobalKey<FormState>();
+  bool isLoading = true;
 
   dynamic sessionId = '';
   Map clientDataOdoo = {};
@@ -128,6 +129,41 @@ class _UserProfileState extends State<UserProfile> {
     }
   }
 
+  @override
+  void initState() {
+    super.initState();
+    if (widget.userPhone != null) {
+      _phoneController.text = widget.userPhone!;
+    }
+    _fetchOdooSession();
+    _fetchDietsAndStoppers();
+    if (widget.userPhone != null) {
+      _phoneController.text = widget.userPhone!;
+    }
+    print('User profile widget initialized!');
+    print('clientData: ${widget.clientData}');
+  }
+
+  Future<void> _fetchDietsAndStoppers() async {
+    try {
+      setState(() {
+        isLoading =
+            true; // Set loading state to true when fetching data for refreshing
+      });
+      sessionId = await widget.odooService.fetchSessionId();
+      await _fetchAvailableDiets();
+      await _fetchAvailableIngredients();
+      isLoading = false;
+    } catch (e) {
+      print('Error fetching Diets and Stoppers: $e');
+      isLoading = false;
+    }
+    setState(() {
+      isLoading =
+          false; // Set loading state to true when fetching data for refreshing
+    });
+  }
+
   Future<void> _fetchAvailableDiets() async {
     try {
       availableDiets =
@@ -146,19 +182,6 @@ class _UserProfileState extends State<UserProfile> {
     } catch (e) {
       print('Error fetching available ingredients: $e');
     }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchOdooSession();
-    _fetchAvailableDiets();
-    _fetchAvailableIngredients();
-    if (widget.userPhone != null) {
-      _phoneController.text = widget.userPhone!;
-    }
-    print('User profile widget initialized!');
-    print('clientData: ${widget.clientData}');
   }
 
   void _showDietPopup(BuildContext context) async {
@@ -788,36 +811,38 @@ class _UserProfileState extends State<UserProfile> {
                     )
                   ],
                 )
-              : SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 10),
-                      buildDietaryCard(
-                          'Diets', diets, () => _showDietPopup(context)),
-                      const SizedBox(height: 10),
-                      buildDietaryCard("Don't eat", stoppers,
-                          () => _showDontEatPopup(context)),
-                      const SizedBox(height: 10),
-                      buildCaloriesMealsCard(
-                        'Daily Calories Intake',
-                        dailyCalories != 'Not set yet'
-                            ? '$dailyCalories cal'
-                            : 'Not set yet',
-                        () => _showCaloriesPopup(context),
+              : isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 10),
+                          buildDietaryCard(
+                              'Diets', diets, () => _showDietPopup(context)),
+                          const SizedBox(height: 10),
+                          buildDietaryCard("Don't eat", stoppers,
+                              () => _showDontEatPopup(context)),
+                          const SizedBox(height: 10),
+                          buildCaloriesMealsCard(
+                            'Daily Calories Intake',
+                            dailyCalories != 'Not set yet'
+                                ? '$dailyCalories cal'
+                                : 'Not set yet',
+                            () => _showCaloriesPopup(context),
+                          ),
+                          const SizedBox(height: 10),
+                          buildCaloriesMealsCard(
+                            'Meals Per day',
+                            mealsPerDay != 'Not set yet'
+                                ? '$mealsPerDay'
+                                : 'Not set yet',
+                            () => _showMealsPerDayPopup(context),
+                          ),
+                          const SizedBox(height: 10),
+                          buildSnacksDessertsCard(eatsSnacks, eatsDesserts),
+                        ],
                       ),
-                      const SizedBox(height: 10),
-                      buildCaloriesMealsCard(
-                        'Meals Per day',
-                        mealsPerDay != 'Not set yet'
-                            ? '$mealsPerDay'
-                            : 'Not set yet',
-                        () => _showMealsPerDayPopup(context),
-                      ),
-                      const SizedBox(height: 10),
-                      buildSnacksDessertsCard(eatsSnacks, eatsDesserts),
-                    ],
-                  ),
-                ),
+                    ),
         ),
       ),
     );
