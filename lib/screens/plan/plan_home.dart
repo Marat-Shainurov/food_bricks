@@ -168,6 +168,7 @@ class _PlanState extends State<Plan> {
   @override
   Widget build(BuildContext context) {
     final diets = widget.clientData?['diets'] ?? [];
+    final stoppers = widget.clientData?['do_not_eat'] ?? [];
     final dailyCalories = caloriesLimit;
     final mealsPerDay =
         widget.clientData?['meals_per_day']?.toString() ?? 'Not set yet';
@@ -189,6 +190,7 @@ class _PlanState extends State<Plan> {
       ),
       body: SafeArea(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             Expanded(
               child: SingleChildScrollView(
@@ -269,12 +271,16 @@ class _PlanState extends State<Plan> {
                           fontSize: 18.0, fontWeight: FontWeight.bold),
                       textAlign: TextAlign.center,
                     ),
+                    // User Info Cards
                     const SizedBox(height: 20),
-
-                    // User Info Cards centered and stretched
                     _buildInfoCard(
                       'Diets',
                       diets.isEmpty ? 'Not set yet' : diets.join(', '),
+                    ),
+                    const SizedBox(height: 20),
+                    _buildInfoCard(
+                      "Don't eat",
+                      stoppers.isEmpty ? 'Not set yet' : stoppers.join(', '),
                     ),
                     const SizedBox(height: 20),
                     _buildInfoCard('Daily Calories Intake', dailyCalories),
