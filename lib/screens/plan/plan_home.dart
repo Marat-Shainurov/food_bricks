@@ -180,13 +180,21 @@ class _PlanState extends State<Plan> {
         : 'Not set yet';
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Daily Plan',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(kToolbarHeight),
+        child: AppBar(
+          title: const Padding(
+            padding:
+                EdgeInsets.only(top: 14), // Add padding to shift title down
+            child: Text(
+              'Daily plan',
+              style:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+          ),
+          backgroundColor: Colors.blue[500],
+          centerTitle: true,
         ),
-        backgroundColor: Colors.blue[500],
-        centerTitle: true,
       ),
       body: SafeArea(
         child: Column(

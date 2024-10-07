@@ -3,10 +3,12 @@ import 'package:food_bricks/services/auth_service.dart';
 import 'package:telephony/telephony.dart';
 import 'package:food_bricks/services/odoo_service.dart';
 import 'package:food_bricks/screens/wrapper.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class UserProfile extends StatefulWidget {
   final String? selectedRestaurant;
   final String? selectedRestaurantId;
+  final Function(String, String) setSelectedRestaurant;
   final String? userPhone;
   final Function(String) setUserPhone;
   final Function(Map) setClientData;
@@ -16,10 +18,11 @@ class UserProfile extends StatefulWidget {
   const UserProfile(
       {Key? key,
       this.userPhone,
-      this.selectedRestaurant,
-      this.selectedRestaurantId,
       required this.setUserPhone,
       required this.setClientData,
+      this.selectedRestaurant,
+      this.selectedRestaurantId,
+      required this.setSelectedRestaurant,
       this.clientData,
       required this.odooService})
       : super(key: key);
@@ -44,6 +47,10 @@ class _UserProfileState extends State<UserProfile> {
   Map clientDataOdoo = {};
   List<dynamic> availableDiets = [];
   List<dynamic> availableIngredients = [];
+  dynamic restaurants = [];
+  String? _selectedRestaurant;
+  String? _selectedRestaurantId;
+  bool _isRestaurantSet = false;
 
   Future<void> _logout() async {
     await AuthService.logout();
@@ -136,7 +143,8 @@ class _UserProfileState extends State<UserProfile> {
       _phoneController.text = widget.userPhone!;
     }
     _fetchOdooSession();
-    _fetchDietsAndStoppers();
+    _fetchWidgetData();
+    _loadSelectedRestaurant();
     if (widget.userPhone != null) {
       _phoneController.text = widget.userPhone!;
     }
@@ -144,24 +152,54 @@ class _UserProfileState extends State<UserProfile> {
     print('clientData: ${widget.clientData}');
   }
 
-  Future<void> _fetchDietsAndStoppers() async {
+  Future<void> _loadSelectedRestaurant() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedRestaurant = prefs.getString('selectedRestaurant');
+    final savedRestaurantId = prefs.getString('selectedRestaurantId');
+
+    if (savedRestaurant != null && savedRestaurantId != null) {
+      setState(() {
+        _selectedRestaurant = savedRestaurant;
+        _selectedRestaurantId = savedRestaurantId;
+        _isRestaurantSet = true;
+      });
+
+      // Notify wrapper of the selected restaurant
+      widget.setSelectedRestaurant(
+          _selectedRestaurant!, _selectedRestaurantId!);
+    }
+  }
+
+  Future<void> _fetchWidgetData() async {
     try {
       setState(() {
-        isLoading =
-            true; // Set loading state to true when fetching data for refreshing
+        isLoading = true;
       });
       sessionId = await widget.odooService.fetchSessionId();
       await _fetchAvailableDiets();
       await _fetchAvailableIngredients();
+      await _fetchAvailableRestaurants();
       isLoading = false;
+      print('restaurants: $restaurants');
     } catch (e) {
       print('Error fetching Diets and Stoppers: $e');
       isLoading = false;
     }
     setState(() {
-      isLoading =
-          false; // Set loading state to true when fetching data for refreshing
+      isLoading = false;
     });
+  }
+
+  Future<void> _fetchAvailableRestaurants() async {
+    try {
+      final fetchedRestaurants =
+          await widget.odooService.fetchRestaurants(sessionId);
+      setState(() {
+        restaurants = fetchedRestaurants;
+      });
+    } catch (e) {
+      print('Error fetching available restaurants: $e');
+    }
   }
 
   Future<void> _fetchAvailableDiets() async {
@@ -182,6 +220,78 @@ class _UserProfileState extends State<UserProfile> {
     } catch (e) {
       print('Error fetching available ingredients: $e');
     }
+  }
+
+  void _showRestaurantPopup() {
+    String? tempSelectedRestaurant = _selectedRestaurant;
+    String? tempSelectedRestaurantId = _selectedRestaurantId;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return AlertDialog(
+              title: Text('Select Restaurant'),
+              content: DropdownButton<String>(
+                value: tempSelectedRestaurant,
+                hint: const Text(
+                  "Select Restaurant",
+                  style: TextStyle(fontSize: 14),
+                ),
+                items: restaurants.map<DropdownMenuItem<String>>((restaurant) {
+                  return DropdownMenuItem<String>(
+                    value: restaurant['name'],
+                    child: Text(restaurant['name']),
+                  );
+                }).toList(),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    tempSelectedRestaurant = newValue;
+                    final selectedRestaurant = restaurants.firstWhere(
+                      (restaurant) => restaurant['name'] == newValue,
+                    );
+                    tempSelectedRestaurantId = selectedRestaurant['identifier'];
+                  });
+                },
+              ),
+              actions: <Widget>[
+                ElevatedButton(
+                  onPressed: () {
+                    if (tempSelectedRestaurant != null &&
+                        tempSelectedRestaurantId != null) {
+                      // Save selected restaurant only after 'OK' is pressed
+                      _saveSelectedRestaurant(
+                          tempSelectedRestaurant!, tempSelectedRestaurantId!);
+                      setState(() {
+                        _selectedRestaurant = tempSelectedRestaurant;
+                        _selectedRestaurantId = tempSelectedRestaurantId;
+                      });
+                    }
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _saveSelectedRestaurant(
+      String restaurantName, String restaurantId) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('selectedRestaurant', restaurantName);
+    prefs.setString('selectedRestaurantId', restaurantId);
+
+    setState(() {
+      _isRestaurantSet = true;
+    });
+
+    // Call the wrapper function with both arguments
+    widget.setSelectedRestaurant(restaurantName, restaurantId);
   }
 
   void _showDietPopup(BuildContext context) async {
@@ -689,25 +799,34 @@ class _UserProfileState extends State<UserProfile> {
     print('clientData: ----- ${widget.clientData}');
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          widget.userPhone != null
-              ? 'Welcome, ${clientName ?? widget.userPhone}'
-              : 'User Profile',
-          style:
-              const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: Colors.blue[500],
-        centerTitle: true,
-        actions: [
-          // Conditionally show the logout button
-          if (widget.userPhone != null)
-            IconButton(
-              icon: Icon(Icons.logout),
-              onPressed: _logout, // Call the logout method
-              tooltip: 'Logout',
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(kToolbarHeight),
+        child: AppBar(
+          title: Padding(
+            padding:
+                EdgeInsets.only(top: 14), // Adjust padding to shift title down
+            child: Text(
+              widget.userPhone != null
+                  ? 'Welcome, ${clientName ?? widget.userPhone}'
+                  : 'User Profile',
+              style: const TextStyle(
+                  color: Colors.white, fontWeight: FontWeight.bold),
             ),
-        ],
+          ),
+          backgroundColor: Colors.blue[500],
+          centerTitle: true,
+          actions: [
+            if (widget.userPhone != null)
+              Padding(
+                padding: EdgeInsets.only(top: 14), // Move icon down and right
+                child: IconButton(
+                  icon: Icon(Icons.logout),
+                  onPressed: _logout, // Call the logout method
+                  tooltip: 'Logout',
+                ),
+              ),
+          ],
+        ),
       ),
       body: SafeArea(
         child: Padding(
@@ -817,6 +936,8 @@ class _UserProfileState extends State<UserProfile> {
                       child: Column(
                         children: [
                           const SizedBox(height: 10),
+                          _buildRestaurantCard('Restaurant'),
+                          const SizedBox(height: 10),
                           buildDietaryCard(
                               'Diets', diets, () => _showDietPopup(context)),
                           const SizedBox(height: 10),
@@ -843,6 +964,36 @@ class _UserProfileState extends State<UserProfile> {
                         ],
                       ),
                     ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRestaurantCard(String title) {
+    return Card(
+      elevation: 4,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style:
+                  const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(_isRestaurantSet ? _selectedRestaurant! : 'Not set yet'),
+                ElevatedButton(
+                  onPressed: _showRestaurantPopup,
+                  child: Text(_isRestaurantSet ? 'Edit' : 'Add'),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );

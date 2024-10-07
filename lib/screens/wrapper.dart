@@ -3,8 +3,9 @@ import 'package:food_bricks/screens/plan/plan_home.dart';
 import 'package:food_bricks/screens/home/constructors_home.dart';
 import 'package:food_bricks/screens/user_profile/profile_login.dart';
 import 'package:food_bricks/services/odoo_service.dart';
-import 'package:food_bricks/services/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:food_bricks/services/firestore_service.dart';
 
 class Wrapper extends StatefulWidget {
   final String? selectedRestaurant;
@@ -32,6 +33,10 @@ class _WrapperState extends State<Wrapper> {
   String? userPhone;
   Map? clientData;
   dynamic sessionId = '';
+  DocumentSnapshot? activeOrder; // For tracking the active order
+  bool showOrderBar = false; // Flag to show/hide the order notification bar
+  bool isOrderDone = false; // Track if the order is marked as "Done"
+  int? activeOrdersNumber;
 
   final OdooService odooService = OdooService('https://evo.migom.cloud');
   // final OdooService odooService = OdooService('http://192.168.100.38:8069');
@@ -46,6 +51,8 @@ class _WrapperState extends State<Wrapper> {
     selectedRestaurantId = widget.selectedRestaurantId;
     userPhone = widget.userPhone;
     clientData = widget.clientData ?? {};
+
+    _monitorActiveOrder(); // Start monitoring active orders
   }
 
   Future<void> _checkUserLogin() async {
@@ -71,6 +78,24 @@ class _WrapperState extends State<Wrapper> {
         print('No phone number found for the current user.');
       }
     }
+  }
+
+  // Monitor the active order (status != "Done") in real-time
+  void _monitorActiveOrder() {
+    getActiveOrders().listen((QuerySnapshot snapshot) {
+      if (snapshot.docs.isNotEmpty) {
+        setState(() {
+          activeOrdersNumber = snapshot.docs.length;
+          activeOrder = snapshot.docs.first;
+          showOrderBar = true;
+          isOrderDone = false;
+        });
+      } else {
+        setState(() {
+          showOrderBar = false;
+        });
+      }
+    });
   }
 
   // List of widgets to display for each tab
@@ -106,8 +131,21 @@ class _WrapperState extends State<Wrapper> {
               userPhone = phone;
             });
           },
+          setSelectedRestaurant: (restaurant, restaurantId) {
+            setState(() {
+              selectedRestaurant = restaurant;
+              selectedRestaurantId = restaurantId;
+            });
+          },
         ), // Constructors widget
       ];
+
+  // Handle the "Ok" button for closing the order notification bar
+  void _dismissOrderBar() {
+    setState(() {
+      showOrderBar = false;
+    });
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -118,8 +156,27 @@ class _WrapperState extends State<Wrapper> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _widgetOptions(
-          context)[_selectedIndex], // Display the selected widget
+      body: Stack(
+        children: [
+          _widgetOptions(context)[_selectedIndex],
+          if (showOrderBar && activeOrder != null)
+            SafeArea(
+              child: Container(
+                color: isOrderDone ? Colors.green : Colors.yellow[800],
+                padding: const EdgeInsets.all(0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Active Orders - $activeOrdersNumber',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ],
+                ),
+              ),
+            )
+        ],
+      ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(

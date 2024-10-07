@@ -89,49 +89,62 @@ class _constructorsHomeState extends State<constructorsHome> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: isLoading
-            ? const Text("Loading...",
-                style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18))
-            : DropdownButton<String>(
-                value: widget.selectedRestaurant,
-                hint: const Text(
-                  "Select Restaurant",
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(kToolbarHeight),
+        child: AppBar(
+          title: isLoading
+              ? const Text("Loading...",
                   style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
-                      fontSize: 18),
+                      fontSize: 18))
+              : const Padding(
+                  padding: EdgeInsets.only(
+                      top: 14), // Add padding to shift title down
+                  child: Text(
+                    'Dish planner',
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
                 ),
-                items: restaurants.map<DropdownMenuItem<String>>((restaurant) {
-                  return DropdownMenuItem<String>(
-                    value: restaurant['name'],
-                    child: Text(
-                      restaurant['name'],
-                      style: const TextStyle(color: Colors.white), // White text
-                    ),
-                  );
-                }).toList(),
-                onChanged: (String? newValue) {
-                  final selectedRestaurantId = restaurants.firstWhere(
-                      (restaurant) =>
-                          restaurant['name'] == newValue)['identifier'];
-                  widget.setSelectedRestaurant(newValue!, selectedRestaurantId);
-                  _fetchSessionAndData();
-                },
-                dropdownColor: Colors.blue[500],
-              ),
-        backgroundColor: Colors.blue[500],
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            color: Colors.white,
-            onPressed: _fetchSessionAndData, // Refresh the orders when pressed
-          ),
-        ],
+          // : DropdownButton<String>(
+          //     value: widget.selectedRestaurant,
+          //     hint: const Text(
+          //       "Select Restaurant",
+          //       style: TextStyle(
+          //           color: Colors.white,
+          //           fontWeight: FontWeight.bold,
+          //           fontSize: 18),
+          //     ),
+          //     items: restaurants.map<DropdownMenuItem<String>>((restaurant) {
+          //       return DropdownMenuItem<String>(
+          //         value: restaurant['name'],
+          //         child: Text(
+          //           restaurant['name'],
+          //           style: const TextStyle(color: Colors.white), // White text
+          //         ),
+          //       );
+          //     }).toList(),
+          //     onChanged: (String? newValue) {
+          //       final selectedRestaurantId = restaurants.firstWhere(
+          //           (restaurant) =>
+          //               restaurant['name'] == newValue)['identifier'];
+          //       widget.setSelectedRestaurant(newValue!, selectedRestaurantId);
+          //       _fetchSessionAndData();
+          //     },
+          //     dropdownColor: Colors.blue[500],
+          //   ),
+          backgroundColor: Colors.blue[500],
+          centerTitle: true,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              color: Colors.white,
+              onPressed:
+                  _fetchSessionAndData, // Refresh the orders when pressed
+            ),
+          ],
+        ),
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
